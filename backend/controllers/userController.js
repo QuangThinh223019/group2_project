@@ -1,17 +1,25 @@
-let users = []; // mảng tạm để lưu user
+const User = require('../models/User');
 
 // GET /users
-exports.getUsers = (req, res) => {
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
     res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // POST /users
-exports.createUser = (req, res) => {
-    const newUser = {
-        id: users.length + 1,
-        name: req.body.name,
-        email: req.body.email
-    };
-    users.push(newUser);
+exports.createUser = async (req, res) => {
+  try {
+    const newUser = new User({
+      name: req.body.name,
+      email: req.body.email
+    });
+    await newUser.save();
     res.status(201).json(newUser);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
