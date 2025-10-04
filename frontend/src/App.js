@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import UserList from "./component/UserList";
-import AddUser from "./component/AddUser";
+import UserList from "./components/UserList";
+import AddUser from "./components/AddUser";
 import "./App.css"; // import CSS
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
     <div className="container">
       <h1>🚀 Quản lý User</h1>
       <AddUser onUserAdded={handleRefresh} />
-      <UserList key={refresh} />
+      <UserList refresh={refresh} />
     </div>
   );
 }
