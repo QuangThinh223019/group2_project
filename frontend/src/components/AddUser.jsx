@@ -7,6 +7,17 @@ function AddUser({ onUserAdded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // ✅ Validation cơ bản
+    if (!name.trim()) {
+      alert("Name không được để trống");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      alert("Email không hợp lệ");
+      return;
+    }
+
     try {
       await axios.post("http://localhost:3000/users", { name, email });
       onUserAdded(); // báo App refresh danh sách
@@ -14,6 +25,7 @@ function AddUser({ onUserAdded }) {
       setEmail("");
     } catch (err) {
       console.error("Lỗi khi thêm user:", err);
+      alert("Thêm user thất bại");
     }
   };
 
@@ -35,6 +47,9 @@ function AddUser({ onUserAdded }) {
         required
       />
       <button type="submit">➕ Thêm</button>
+      <p style={{ fontSize: "12px", color: "#555", marginTop: "5px" }}>
+        * Name không được để trống, Email phải hợp lệ
+      </p>
     </form>
   );
 }

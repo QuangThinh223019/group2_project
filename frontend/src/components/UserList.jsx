@@ -1,12 +1,10 @@
-// src/components/UserList.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function UserList({ refresh }) {
   const [users, setUsers] = useState([]);
-  const [editingUser, setEditingUser] = useState(null); // user đang sửa
+  const [editingUser, setEditingUser] = useState(null);
 
-  // Load danh sách user
   const fetchUsers = async () => {
     try {
       const res = await axios.get("http://localhost:3000/users");
@@ -20,7 +18,6 @@ function UserList({ refresh }) {
     fetchUsers();
   }, [refresh]);
 
-  // Xóa user
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa user này?")) return;
     try {
@@ -31,12 +28,10 @@ function UserList({ refresh }) {
     }
   };
 
-  // Bắt đầu sửa user
   const handleEdit = (user) => {
     setEditingUser(user);
   };
 
-  // Lưu user đã sửa
   const saveEdit = async () => {
     try {
       await axios.put(`http://localhost:3000/users/${editingUser._id}`, editingUser);
@@ -51,7 +46,6 @@ function UserList({ refresh }) {
     <div>
       <h2>Danh sách User</h2>
 
-      {/* Form sửa user */}
       {editingUser && (
         <div style={{ marginBottom: "20px", padding: "10px", border: "1px solid #ccc" }}>
           <h3>Chỉnh sửa user</h3>
@@ -69,16 +63,15 @@ function UserList({ refresh }) {
             placeholder="Email"
             style={{ marginRight: "10px", padding: "4px" }}
           />
-          <button onClick={saveEdit} style={{ marginRight: "5px", padding: "4px 8px" }}>
-            Lưu
-          </button>
-          <button onClick={() => setEditingUser(null)} style={{ padding: "4px 8px" }}>
-            Hủy
-          </button>
+          <button onClick={saveEdit} style={{ marginRight: "5px", padding: "4px 8px" }}>Lưu</button>
+          <button onClick={() => setEditingUser(null)} style={{ padding: "4px 8px" }}>Hủy</button>
+          {/* Note nhỏ */}
+          <p style={{ fontSize: "12px", color: "#555", marginTop: "5px" }}>
+            * Chỉnh sửa user trực tiếp và nhấn Lưu
+          </p>
         </div>
       )}
 
-      {/* Danh sách user */}
       <table style={{ borderCollapse: "collapse", width: "100%" }}>
         <thead>
           <tr>
