@@ -1,3 +1,4 @@
+require('dotenv').config(); 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,7 +11,7 @@ app.use(express.urlencoded({extended:true}));
 
 // Import routes
 const userRoutes = require('./routes/user');
-app.use('/', userRoutes);
+app.use('/users', userRoutes);
 
 // Lấy biến môi trường từ .env
 const PORT = process.env.PORT || 3000;
