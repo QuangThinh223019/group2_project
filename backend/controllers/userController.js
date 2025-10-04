@@ -1,19 +1,28 @@
-let users = []; // mảng tạm để lưu user
+const mongoose = require('mongoose');
+const User = require('../models/User');
 
 // GET /users
-exports.getUsers = (req, res) => {
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find().lean();
     res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', detail: err.message });
+  }
 };
 
 // POST /users
-exports.createUser = (req, res) => {
-    const newUser = {
-        id: users.length + 1,
-        name: req.body.name,
-        email: req.body.email
-    };
-    users.push(newUser);
-    res.status(201).json(newUser);
+exports.createUser = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    if (!name?.trim() || !email?.trim()) {
+      return res.status(400).json({ message: 'Name và Email là bắt buộc' });
+    }
+    const user = await User.create({ name: name.trim(), email: email.trim() });
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', detail: err.message });
+  }
 };
 
 // PUT /users/:id
@@ -21,7 +30,7 @@ exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'ID không hợp lệ' });
+      return res.status(400).json({ message: 'ID không hợp liệu' });
     }
 
     const updates = {};
@@ -33,8 +42,8 @@ exports.updateUser = async (req, res) => {
       { $set: updates },
       { new: true, runValidators: true }
     );
-    if (!updated) return res.status(404).json({ message: 'User không tồn tại' });
 
+    if (!updated) return res.status(404).json({ message: 'User không tồn tại' });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: 'Server error', detail: err.message });
