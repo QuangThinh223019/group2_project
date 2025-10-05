@@ -44,7 +44,7 @@ function UserList({ refresh }) {
 
   return (
     <div>
-      <h2>Danh sách User</h2>
+      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Danh sách User</h2>
 
       {editingUser && (
         <div style={{ marginBottom: "20px", padding: "10px", border: "1px solid #ccc" }}>
