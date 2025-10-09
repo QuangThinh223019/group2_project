@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../App.css";
 
-function UserList({ refresh }) {
+function UserList({ refresh, onEditUser }) {
   const [users, setUsers] = useState([]);
-  const [editingUser, setEditingUser] = useState(null);
+  const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const fetchUsers = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
-
     try {
       const res = await axios.get("http://localhost:4000/api/users", {
         headers: { Authorization: `Bearer ${token}` },
@@ -22,54 +22,31 @@ function UserList({ refresh }) {
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, [refresh]);
+  useEffect(() => { fetchUsers(); }, [refresh]);
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa user này?")) return;
     const token = localStorage.getItem("token");
     try {
       await axios.delete(`http://localhost:4000/api/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(users.filter((user) => user._id !== id));
+      setUsers(users.filter(u => u._id !== id));
+      setMessage("🎉 Xóa user thành công!");
+      setSuccess(true);
+      setTimeout(() => setMessage(""), 1500);
     } catch (err) {
-      console.error("Lỗi khi xóa user:", err);
-      alert("Xóa user thất bại.");
-    }
-  };
-
-  const handleEdit = (user) => {
-    setEditingUser(user); // lưu user muốn sửa
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
-    try {
-      const res = await axios.put(
-        `http://localhost:4000/api/users/${editingUser._id}`,
-        {
-          name: editingUser.name,
-          email: editingUser.email,
-          role: editingUser.role,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      // Cập nhật list users
-      setUsers(users.map(u => u._id === res.data._id ? res.data : u));
-      setEditingUser(null); // đóng form
-    } catch (err) {
-      console.error("Lỗi khi lưu user:", err);
-      alert("Cập nhật thất bại");
+      console.error(err);
+      setMessage("❌ Xóa user thất bại!");
+      setSuccess(false);
+      setTimeout(() => setMessage(""), 1500);
     }
   };
 
   return (
     <div className="list-container">
       <h2>Danh sách User</h2>
+      {message && <p className={success ? "message-success" : "message-error"}>{message}</p>}
       <table>
         <thead>
           <tr>
@@ -82,65 +59,17 @@ function UserList({ refresh }) {
         </thead>
         <tbody>
           {users.length === 0 ? (
-            <tr>
-              <td colSpan={5} style={{ textAlign: "center" }}>
-                Chưa có user nào
-              </td>
-            </tr>
+            <tr><td colSpan={5} style={{ textAlign: "center" }}>Chưa có user nào</td></tr>
           ) : (
-            users.map((user) => (
+            users.map(user => (
               <tr key={user._id}>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{"********"}</td>
+                <td>{user.role || "user"}</td>
                 <td>
-                  {editingUser && editingUser._id === user._id ? (
-                    <input
-                      value={editingUser.name}
-                      onChange={(e) =>
-                        setEditingUser({ ...editingUser, name: e.target.value })
-                      }
-                    />
-                  ) : (
-                    user.name
-                  )}
-                </td>
-                <td>
-                  {editingUser && editingUser._id === user._id ? (
-                    <input
-                      value={editingUser.email}
-                      onChange={(e) =>
-                        setEditingUser({ ...editingUser, email: e.target.value })
-                      }
-                    />
-                  ) : (
-                    user.email
-                  )}
-                </td>
-                <td>
-                  {editingUser && editingUser._id === user._id ? (
-                    <select
-                      value={editingUser.role}
-                      onChange={(e) =>
-                        setEditingUser({ ...editingUser, role: e.target.value })
-                      }
-                    >
-                      <option value="user">user</option>
-                      <option value="admin">admin</option>
-                    </select>
-                  ) : (
-                    user.role || "user"
-                  )}
-                </td>
-                <td>
-                  {editingUser && editingUser._id === user._id ? (
-                    <>
-                      <button onClick={handleSave}>💾 Lưu</button>
-                      <button onClick={() => setEditingUser(null)}>❌ Hủy</button>
-                    </>
-                  ) : (
-                    <>
-                      <button onClick={() => handleEdit(user)}>✏️ Sửa</button>
-                      <button onClick={() => handleDelete(user._id)}>🗑️ Xóa</button>
-                    </>
-                  )}
+                  <button onClick={() => onEditUser(user)}>✏️ Sửa</button>
+                  <button onClick={() => handleDelete(user._id)}>🗑️ Xóa</button>
                 </td>
               </tr>
             ))
