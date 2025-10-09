@@ -1,13 +1,14 @@
-require('dotenv').config(); 
+require('dotenv').config(); // Đọc biến môi trường từ file .env
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config(); // <--- Quan trọng để đọc file .env
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 
 // Import routes
 const userRoutes = require('./routes/user');
