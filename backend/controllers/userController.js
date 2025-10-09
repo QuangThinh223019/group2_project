@@ -14,25 +14,16 @@ exports.getUsers = async (req, res) => {
 // POST /users
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name?.trim() || !email?.trim() || !password?.trim()) {
-      return res.status(400).json({ message: 'Name, Email và Password là bắt buộc' });
+    const { name, email } = req.body;
+    if (!name?.trim() || !email?.trim()) {
+      return res.status(400).json({ message: 'Name và Email là bắt buộc' });
     }
-
-    // Kiểm tra email trùng
-    const existing = await User.findOne({ email: email.trim() });
-    if (existing) {
-      return res.status(400).json({ message: 'Email đã tồn tại' });
-    }
-
-    // Tạo user mới (password sẽ tự được mã hóa trong schema)
-    const user = await User.create({ name: name.trim(), email: email.trim(), password: password.trim() });
-    res.status(201).json({ message: 'Tạo user thành công', user });
+    const user = await User.create({ name: name.trim(), email: email.trim() });
+    res.status(201).json(user);
   } catch (err) {
     res.status(500).json({ message: 'Server error', detail: err.message });
   }
 };
-
 
 // PUT /users/:id
 exports.updateUser = async (req, res) => {
