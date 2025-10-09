@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "../App.css";
 
 function UserList({ refresh }) {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
 
   const fetchUsers = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
     try {
-      const res = await axios.get("http://localhost:3000/users");
+      const res = await axios.get("http://localhost:4000/api/users", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setUsers(res.data);
     } catch (err) {
       console.error("Lỗi khi load user:", err);
+      localStorage.removeItem("token");
+      window.location.reload();
     }
   };
 
@@ -19,94 +27,123 @@ function UserList({ refresh }) {
   }, [refresh]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa user này?")) return;
+    const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:3000/users/${id}`);
+      await axios.delete(`http://localhost:4000/api/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setUsers(users.filter((user) => user._id !== id));
     } catch (err) {
       console.error("Lỗi khi xóa user:", err);
+      alert("Xóa user thất bại.");
     }
   };
 
   const handleEdit = (user) => {
-    setEditingUser(user);
+    setEditingUser(user); // lưu user muốn sửa
   };
 
-  const saveEdit = async () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
     try {
-      await axios.put(`http://localhost:3000/users/${editingUser._id}`, editingUser);
-      setUsers(users.map((u) => (u._id === editingUser._id ? editingUser : u)));
-      setEditingUser(null);
+      const res = await axios.put(
+        `http://localhost:4000/api/users/${editingUser._id}`,
+        {
+          name: editingUser.name,
+          email: editingUser.email,
+          role: editingUser.role,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      // Cập nhật list users
+      setUsers(users.map(u => u._id === res.data._id ? res.data : u));
+      setEditingUser(null); // đóng form
     } catch (err) {
-      console.error("Lỗi khi cập nhật user:", err);
+      console.error("Lỗi khi lưu user:", err);
+      alert("Cập nhật thất bại");
     }
   };
 
   return (
-    <div>
-      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Danh sách User</h2>
-
-      {editingUser && (
-        <div style={{ marginBottom: "20px", padding: "10px", border: "1px solid #ccc" }}>
-          <h3>Chỉnh sửa user</h3>
-          <input
-            type="text"
-            value={editingUser.name}
-            onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-            placeholder="Name"
-            style={{ marginRight: "10px", padding: "4px" }}
-          />
-          <input
-            type="email"
-            value={editingUser.email}
-            onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-            placeholder="Email"
-            style={{ marginRight: "10px", padding: "4px" }}
-          />
-          <button onClick={saveEdit} style={{ marginRight: "5px", padding: "4px 8px" }}>Lưu</button>
-          <button onClick={() => setEditingUser(null)} style={{ padding: "4px 8px" }}>Hủy</button>
-          {/* Note nhỏ */}
-          <p style={{ fontSize: "12px", color: "#555", marginTop: "5px" }}>
-            * Chỉnh sửa user trực tiếp và nhấn Lưu
-          </p>
-        </div>
-      )}
-
-      <table style={{ borderCollapse: "collapse", width: "100%" }}>
+    <div className="list-container">
+      <h2>Danh sách User</h2>
+      <table>
         <thead>
           <tr>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Name</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Email</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>Action</th>
+            <th>Tên</th>
+            <th>Email</th>
+            <th>Mật khẩu</th>
+            <th>Vai trò</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user._id}>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>{user.name}</td>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>{user.email}</td>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>
-                <button
-                  style={{ marginRight: "8px", padding: "4px 8px", cursor: "pointer" }}
-                  onClick={() => handleEdit(user)}
-                >
-                  Sửa
-                </button>
-                <button
-                  style={{ padding: "4px 8px", cursor: "pointer" }}
-                  onClick={() => handleDelete(user._id)}
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          ))}
-          {users.length === 0 && (
+          {users.length === 0 ? (
             <tr>
-              <td colSpan={3} style={{ textAlign: "center", padding: "8px" }}>
+              <td colSpan={5} style={{ textAlign: "center" }}>
                 Chưa có user nào
               </td>
             </tr>
+          ) : (
+            users.map((user) => (
+              <tr key={user._id}>
+                <td>
+                  {editingUser && editingUser._id === user._id ? (
+                    <input
+                      value={editingUser.name}
+                      onChange={(e) =>
+                        setEditingUser({ ...editingUser, name: e.target.value })
+                      }
+                    />
+                  ) : (
+                    user.name
+                  )}
+                </td>
+                <td>
+                  {editingUser && editingUser._id === user._id ? (
+                    <input
+                      value={editingUser.email}
+                      onChange={(e) =>
+                        setEditingUser({ ...editingUser, email: e.target.value })
+                      }
+                    />
+                  ) : (
+                    user.email
+                  )}
+                </td>
+                <td>
+                  {editingUser && editingUser._id === user._id ? (
+                    <select
+                      value={editingUser.role}
+                      onChange={(e) =>
+                        setEditingUser({ ...editingUser, role: e.target.value })
+                      }
+                    >
+                      <option value="user">user</option>
+                      <option value="admin">admin</option>
+                    </select>
+                  ) : (
+                    user.role || "user"
+                  )}
+                </td>
+                <td>
+                  {editingUser && editingUser._id === user._id ? (
+                    <>
+                      <button onClick={handleSave}>💾 Lưu</button>
+                      <button onClick={() => setEditingUser(null)}>❌ Hủy</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => handleEdit(user)}>✏️ Sửa</button>
+                      <button onClick={() => handleDelete(user._id)}>🗑️ Xóa</button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))
           )}
         </tbody>
       </table>
