@@ -16,10 +16,10 @@ function UserList({ refresh, onEditUser }) {
       });
       setUsers(res.data);
     } catch (err) {
-      console.error("Lỗi khi load user:", err);
-      localStorage.removeItem("token");
-      window.location.reload();
-    }
+  console.error("Lỗi khi load user:", err);
+  setMessage("⚠️ Không thể tải danh sách user!");
+  setSuccess(false);
+}
   };
 
   useEffect(() => { fetchUsers(); }, [refresh]);

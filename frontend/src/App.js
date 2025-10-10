@@ -5,59 +5,113 @@ import LoginPage from "./pages/LoginPage";
 import LogoutButton from "./components/LogoutButton";
 import AddUser from "./components/AddUser";
 import UserList from "./components/UserList";
+import Profile from "./components/Profile";
 import "./App.css";
 
 function App() {
   const [refresh, setRefresh] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [editingUser, setEditingUser] = useState(null); // user đang sửa
+  const [role, setRole] = useState(localStorage.getItem("role") || "");
+  const [editingUser, setEditingUser] = useState(null);
+  const [loading, setLoading] = useState(true); // 🟢 trạng thái chờ load token
 
-  // kiểm tra token khi load App
+  // 🟢 kiểm tra token + role khi load App
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const savedRole = localStorage.getItem("role");
+
     if (token) setIsLoggedIn(true);
+    if (savedRole) setRole(savedRole.toLowerCase());
+
+    // sau khi kiểm tra xong thì tắt loading
+    setLoading(false);
   }, []);
+
+  // 🕓 Nếu đang kiểm tra token/role → hiển thị màn loading tạm
+  if (loading) {
+    return (
+      <div className="container">
+        <h2>⏳ Đang tải...</h2>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
       <div className="container">
         <h1>🚀 Quản lý User</h1>
-        
 
         <Routes>
-  <Route path="/signup" element={<SignupPage />} />
-  <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
-  <Route
-    path="/"
-    element={
-      isLoggedIn ? (
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          <Route
+  path="/profile"
+  element={
+    loading ? (
+      <h2>⏳ Đang tải...</h2>
+    ) : isLoggedIn ? (
+      <Profile />
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+          <Route path="/signup" element={<SignupPage />} />
+          <Route
+  path="/login"
+  element={<LoginPage setIsLoggedIn={setIsLoggedIn} setRole={setRole} />}
+/>
+
+          
+
+          <Route
+  path="/admin"
+  element={
+    loading ? (
+      <h2>⏳ Đang tải...</h2>
+    ) : isLoggedIn ? (
+      role === "admin" ? (
         <>
-          {/* 🟢 Truyền editingUser và onCancelEdit vào AddUser */}
           <AddUser
             editingUser={editingUser}
-            onUserAdded={() => setRefresh(r => r + 1)}
+            onUserAdded={() => setRefresh((r) => r + 1)}
             onCancelEdit={() => setEditingUser(null)}
           />
           <UserList
             refresh={refresh}
-            onEditUser={(user) => setEditingUser(user)} // khi nhấn Sửa
+            onEditUser={(user) => setEditingUser(user)}
           />
-          <LogoutButton setIsLoggedIn={setIsLoggedIn} />
+          <div className="admin-buttons">
+            <a href="/profile" className="profile-button">
+  👤 Xem Profile
+</a>
+  <LogoutButton setIsLoggedIn={setIsLoggedIn} className="admin-logout-btn"  />
+</div>
+
+
         </>
       ) : (
-        <Navigate to="/login" replace />
+        <Navigate to="/profile" replace />
       )
-    }
-  />
-</Routes>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+        </Routes>
+
         <nav>
           {!isLoggedIn && (
             <>
-              <Link to="/signup" className="nav-btn">Đăng ký</Link>
-              <Link to="/login" className="nav-btn">Đăng nhập</Link>
+              <Link to="/signup" className="nav-btn">
+                Đăng ký
+              </Link>
+              <Link to="/login" className="nav-btn">
+                Đăng nhập
+              </Link>
             </>
           )}
-          
         </nav>
       </div>
     </BrowserRouter>

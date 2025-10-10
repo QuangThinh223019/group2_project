@@ -185,3 +185,34 @@ nav {
   background-color: #0056b3;
 }
 
+
+.admin-buttons {
+  display: flex;
+  gap: 10px;       /* khoảng cách giữa 2 nút */
+  margin-top: 10px; /* cách nội dung phía trên */
+}
+
+.profile-button,
+.admin-logout-btn {
+ display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  height: 36px;
+  text-align: center;
+  text-decoration: none; /* cho <a> */
+  white-space: nowrap;
+  transition: background 0.3s ease;
+  width: 140px; /* chiều rộng bằng nhau */
+}
+
+.profile-button:hover {
+  background-color: #0056b3;
+}

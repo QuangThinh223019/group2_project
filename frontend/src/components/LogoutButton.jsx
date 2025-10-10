@@ -7,9 +7,10 @@ function LogoutButton({ setIsLoggedIn }) {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    alert("✅ Đăng xuất thành công!");
+    localStorage.removeItem("role");
     setIsLoggedIn(false);
-    navigate("/login"); // đưa về màn hình login
+    alert("✅ Đăng xuất thành công!");
+    navigate("/login");
   };
 
   return (
