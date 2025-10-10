@@ -22,6 +22,10 @@ function LoginForm({ setIsLoggedIn }) {
       setSuccess(true); // đánh dấu đăng nhập thành công
       setIsLoggedIn(true);
 
+      // tạm lưu role trong localStorage
+    const role = form.email.includes("admin") ? "admin" : "user";
+    localStorage.setItem("role", role);
+
       // Hiện thông báo 1.5s rồi redirect
       setTimeout(() => {
         navigate("/"); 
