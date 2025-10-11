@@ -27,15 +27,7 @@ function App() {
     setLoading(false);
   }, []);
 
-  // 🕓 Nếu đang kiểm tra token/role → hiển thị màn loading tạm
-  if (loading) {
-    return (
-      <div className="container">
-        <h2>⏳ Đang tải...</h2>
-      </div>
-    );
-  }
-
+  
   return (
     <BrowserRouter>
       <div className="container">
@@ -101,18 +93,20 @@ function App() {
 
         </Routes>
 
-        <nav>
-          {!isLoggedIn && (
-            <>
-              <Link to="/signup" className="nav-btn">
-                Đăng ký
-              </Link>
-              <Link to="/login" className="nav-btn">
-                Đăng nhập
-              </Link>
-            </>
-          )}
-        </nav>
+        {!loading && (
+  <nav>
+    {!isLoggedIn && (
+      <>
+        <Link to="/signup" className="nav-btn">
+          Đăng ký
+        </Link>
+        <Link to="/login" className="nav-btn">
+          Đăng nhập
+        </Link>
+      </>
+    )}
+  </nav>
+)}
       </div>
     </BrowserRouter>
   );
