@@ -27,23 +27,38 @@ function UserList({ refresh, onEditUser }) {
   useEffect(() => { fetchUsers(); }, [refresh]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa user này?")) return;
-    const token = localStorage.getItem("token");
-    try {
-      await axios.delete(`http://localhost:4000/api/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(users.filter(u => u._id !== id));
-      setMessage("🎉 Xóa user thành công!");
-      setSuccess(true);
-      setTimeout(() => setMessage(""), 1500);
-    } catch (err) {
-      console.error(err);
+  // Check nếu admin đang xóa chính mình, không gửi request
+  if (role === "admin" && String(id) === String(currentUserId)) {
+    setMessage("⚠️ Bạn không thể xóa chính mình!");
+    setSuccess(false);
+    setTimeout(() => setMessage(""), 2000);
+    return;
+  }
+
+  if (!window.confirm("Bạn có chắc muốn xóa user này?")) return;
+
+  const token = localStorage.getItem("token");
+  try {
+    await axios.delete(`http://localhost:4000/api/users/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setUsers(users.filter(u => u._id !== id));
+    setMessage("🎉 Xóa user thành công!");
+    setSuccess(true);
+    setTimeout(() => setMessage(""), 1500);
+  } catch (err) {
+    console.error(err);
+    // Bắt lỗi 403 từ backend
+    if (err.response && err.response.status === 403) {
+      setMessage(err.response.data.message || "❌ Bạn không thể thực hiện thao tác này!");
+    } else {
       setMessage("❌ Xóa user thất bại!");
-      setSuccess(false);
-      setTimeout(() => setMessage(""), 1500);
     }
-  };
+    setSuccess(false);
+    setTimeout(() => setMessage(""), 1500);
+  }
+};
+
 
   return (
     <div className="list-container">

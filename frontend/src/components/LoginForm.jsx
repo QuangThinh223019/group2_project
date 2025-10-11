@@ -22,6 +22,7 @@ function LoginForm({ setIsLoggedIn, setRole }) {
       // 🟢 Lưu token + role (chắc chắn là chữ thường)
       saveToken(token);
       localStorage.setItem("role", user.role.toLowerCase());
+      localStorage.setItem("userId", user.id);
       setRole(user.role.toLowerCase());
 
       
