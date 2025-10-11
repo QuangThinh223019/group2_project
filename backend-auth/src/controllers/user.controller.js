@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
+
 // Danh sách user
 exports.listUsers = async (req, res) => {
   try {
