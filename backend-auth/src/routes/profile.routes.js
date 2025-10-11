@@ -5,6 +5,6 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 router.get('/', auth(), ctrl.getMe);
-router.put('/', auth(), ctrl.updateMe);
+router.put('/', auth(), upload.single('avatar'), ctrl.updateMe);
 
 module.exports = router;
