@@ -15,8 +15,16 @@ exports.listUsers = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    if (req.user.role !== 'admin' && req.user.id !== id)
+
+    // Chặn admin tự xóa chính mình
+    if (req.user.role === 'admin' && req.user.id === id) {
+      return res.status(403).json({ message: 'Admin không thể xóa chính mình' });
+    }
+
+    // User bình thường chỉ xóa chính mình
+    if (req.user.role !== 'admin' && req.user.id !== id) {
       return res.status(403).json({ message: 'Forbidden' });
+    }
 
     await User.findByIdAndDelete(id);
     res.json({ message: 'Đã xoá user' });
@@ -28,11 +36,18 @@ exports.deleteUser = async (req, res) => {
 // Thêm user (hash password)
 exports.addUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
-    const hash = await bcrypt.hash(password, 10); // hash password
-    const newUser = new User({ name, email, password: hash, role });
-    await newUser.save();
-    res.json({ id: newUser._id, name, email, role });
+    const { name, email, password, role = 'user' } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Thiếu name/email/password' });
+    }
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(409).json({ message: 'Email đã tồn tại' });
+
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ name, email, password: hash, role });
+    res.status(201).json({
+      id: user._id, name: user.name, email: user.email, role: user.role
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
