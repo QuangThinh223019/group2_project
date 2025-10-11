@@ -6,7 +6,9 @@ function UserList({ refresh, onEditUser }) {
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
-
+  const currentUserId = localStorage.getItem("userId");
+  const role = localStorage.getItem("role");
+  
   const fetchUsers = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -50,6 +52,8 @@ function UserList({ refresh, onEditUser }) {
       <table>
         <thead>
           <tr>
+            <th>STT</th>
+            <th>Avatar</th>
             <th>Tên</th>
             <th>Email</th>
             <th>Mật khẩu</th>
@@ -59,17 +63,36 @@ function UserList({ refresh, onEditUser }) {
         </thead>
         <tbody>
           {users.length === 0 ? (
-            <tr><td colSpan={5} style={{ textAlign: "center" }}>Chưa có user nào</td></tr>
+            <tr><td colSpan={7} style={{ textAlign: "center" }}>Chưa có user nào</td></tr>
           ) : (
-            users.map(user => (
+            users.map((user, index)=> (
               <tr key={user._id}>
+                <td>{index + 1}</td>
+                <td>
+          {user.avatarUrl ? (
+            <img
+              src={`http://localhost:4000${user.avatarUrl}`}
+              alt="avatar"
+              style={{ width: 40, height: 40, borderRadius: "50%" }}
+            />
+          ) : (
+            "–"
+          )}
+        </td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>{"********"}</td>
                 <td>{user.role || "user"}</td>
                 <td>
                   <button onClick={() => onEditUser(user)}>✏️ Sửa</button>
-                  <button onClick={() => handleDelete(user._id)}>🗑️ Xóa</button>
+                  <button
+  onClick={() => handleDelete(user._id)}
+  disabled={role === "admin" && String(user._id) === String(currentUserId)} // admin không xóa chính mình
+  title={role === "admin" && String(user._id) === String(currentUserId) ? "Bạn không thể xóa chính mình" : ""}
+>
+  🗑️ Xóa
+</button>
+
                 </td>
               </tr>
             ))

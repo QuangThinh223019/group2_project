@@ -95,7 +95,7 @@ h1 {
 
 /* Danh sách user */
 .list-container {
-  width: 800px; /* tăng chiều rộng để vừa 5 cột */
+  width: 900px; /* tăng chiều rộng để vừa 5 cột */
   background: white;
   padding: 20px;
   border-radius: 12px;
