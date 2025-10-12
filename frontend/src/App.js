@@ -18,7 +18,8 @@ function App() {
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(true); // 🟢 trạng thái chờ load token
 
-  // 🟢 kiểm tra token + role khi load App
+  const role = localStorage.getItem("role"); 
+  // kiểm tra token khi load App
   useEffect(() => {
     const token = localStorage.getItem("token");
     const savedRole = localStorage.getItem("role");
@@ -35,83 +36,52 @@ function App() {
     <BrowserRouter>
       <div className="container">
         <h1>🚀 Quản lý User</h1>
-
+        
+        
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+  <Route path="/signup" element={<SignupPage />} />
+  <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
+ const role = localStorage.getItem("role");
 
-          <Route
-  path="/profile"
+<Route
+  path="/"
   element={
-    loading ? (
-      <h2>⏳ Đang tải...</h2>
-    ) : isLoggedIn ? (
-      <Profile />
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
-          <Route path="/signup" element={<SignupPage />} />
-          <Route
-  path="/login"
-  element={<LoginPage setIsLoggedIn={setIsLoggedIn} setRole={setRole} />}
-/>
-
-          
-
-          <Route
-  path="/admin"
-  element={
-    loading ? (
-      <h2>⏳ Đang tải...</h2>
-    ) : isLoggedIn ? (
-      role === "admin" ? (
-        <>
-          <AddUser
-            editingUser={editingUser}
-            onUserAdded={() => setRefresh((r) => r + 1)}
-            onCancelEdit={() => setEditingUser(null)}
-          />
-          <UserList
-            refresh={refresh}
-            onEditUser={(user) => setEditingUser(user)}
-          />
-          <div className="admin-buttons">
-            <a href="/profile" className="profile-button">
-  👤 Xem Profile
-</a>
-  <LogoutButton setIsLoggedIn={setIsLoggedIn} className="admin-logout-btn"  />
-</div>
-
-
-        </>
-      ) : (
-        <Navigate to="/profile" replace />
-      )
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-<Route path="/reset-password" element={<ResetPassword />} />
-
-        </Routes>
-
-        {!loading && (
-  <nav>
-    {!isLoggedIn && (
+    isLoggedIn ? (
       <>
-        <Link to="/signup" className="nav-btn">
-          Đăng ký
-        </Link>
-        <Link to="/login" className="nav-btn">
-          Đăng nhập
-        </Link>
+        {role === "admin" && (
+          <>
+            <AddUser
+              editingUser={editingUser}
+              onUserAdded={() => setRefresh(r => r + 1)}
+              onCancelEdit={() => setEditingUser(null)}
+            />
+            <UserList
+              refresh={refresh}
+              onEditUser={(user) => setEditingUser(user)}
+            />
+          </>
+        )}
+
+        {role !== "admin" && <p>Chào bạn, bạn không có quyền xem danh sách user.</p>}
+
+        <LogoutButton setIsLoggedIn={setIsLoggedIn} />
       </>
-    )}
-  </nav>
-)}
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+</Routes>
+        <nav>
+          {!isLoggedIn && (
+            <>
+              <Link to="/signup" className="nav-btn">Đăng ký</Link>
+              <Link to="/login" className="nav-btn">Đăng nhập</Link>
+            </>
+          )}
+          
+        </nav>
       </div>
     </BrowserRouter>
   );

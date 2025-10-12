@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true, select: false },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   avatarUrl: { type: String, default: '' },
+  avatarPublicId: { type: String, default: '' },
   resetToken: { type: String, select: false, default: null },
   resetTokenExp: { type: Date, default: null }
 }, { timestamps: true });

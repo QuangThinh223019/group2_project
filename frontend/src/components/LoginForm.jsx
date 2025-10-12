@@ -30,7 +30,11 @@ function LoginForm({ setIsLoggedIn, setRole }) {
       setMessage("🎉 Đăng nhập thành công!");
       setSuccess(true);
 
-      // Delay 1.5s rồi redirect
+      // tạm lưu role trong localStorage
+    const role = form.email.includes("admin") ? "admin" : "user";
+    localStorage.setItem("role", role);
+
+      // Hiện thông báo 1.5s rồi redirect
       setTimeout(() => {
         if (user.role.toLowerCase() === "admin") {
           navigate("/admin"); // admin
