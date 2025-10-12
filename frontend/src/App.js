@@ -6,6 +6,9 @@ import LogoutButton from "./components/LogoutButton";
 import AddUser from "./components/AddUser";
 import UserList from "./components/UserList";
 import Profile from "./components/Profile";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+
 import "./App.css";
 
 function App() {
@@ -90,6 +93,8 @@ function App() {
     )
   }
 />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password" element={<ResetPassword />} />
 
         </Routes>
 

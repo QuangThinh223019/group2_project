@@ -41,15 +41,44 @@ const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
     const formData = new FormData();
     formData.append("name", name);
+
     if (currentPassword && newPassword) {
       formData.append("currentPassword", currentPassword);
       formData.append("newPassword", newPassword);
     }
-    if (avatar instanceof File) {
-      formData.append("avatar", avatar);
-    }
 
-    await updateProfile(formData, token); // data đã là FormData
+    // Nếu người dùng chọn avatar mới
+    // Nếu người dùng chọn avatar mới
+if (avatar instanceof File) {
+  const avatarForm = new FormData();
+  avatarForm.append("avatar", avatar);
+
+  try {
+    const uploadRes = await axios.post(
+      "http://localhost:4000/api/upload/avatar",
+      avatarForm,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    formData.append("avatarUrl", uploadRes.data.url);
+    setAvatar(uploadRes.data.url); // update state với URL mới
+  } catch (err) {
+    console.error("Upload avatar thất bại:", err.response?.data || err);
+    setMessage("❌ Upload avatar thất bại!");
+    setSuccess(false);
+    setLoading(false);
+    return; // dừng handleUpdate nếu upload fail
+  }
+} else if (typeof avatar === "string") {
+  // giữ avatar cũ
+  formData.append("avatarUrl", avatar);
+}
+
+
+
+    // Update profile
+    await updateProfile(formData, token);
 
     setMessage("🎉 Cập nhật thành công!");
     setSuccess(true);
@@ -63,6 +92,7 @@ const userId = localStorage.getItem("userId");
     setLoading(false);
   }
 };
+
 
 
   const handleLogout = () => {
@@ -107,16 +137,11 @@ const userId = localStorage.getItem("userId");
 
         {avatar && (
           <img
-            src={
-              avatar instanceof File
-                ? URL.createObjectURL(avatar)
-                : avatar.startsWith("http")
-                ? avatar
-                : `http://localhost:4000${avatar}`
-            }
-            alt="Avatar"
-            className="avatar-img"
-          />
+  src={avatar instanceof File ? URL.createObjectURL(avatar) : avatar}
+  alt="Avatar"
+  className="avatar-img"
+/>
+
         )}
 
         <input

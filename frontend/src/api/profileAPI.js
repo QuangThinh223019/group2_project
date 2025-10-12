@@ -13,6 +13,7 @@ export const updateProfile = async (data, token) => {
   // data đã là FormData từ Profile.js
   const res = await axios.put(API_URL, data, {
     headers: {
+      
       Authorization: `Bearer ${token}`,
       // ⚠️ Không cần set Content-Type, để Axios tự set multipart/form-data
     },

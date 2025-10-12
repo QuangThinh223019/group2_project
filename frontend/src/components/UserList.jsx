@@ -85,11 +85,18 @@ function UserList({ refresh, onEditUser }) {
                 <td>{index + 1}</td>
                 <td>
           {user.avatarUrl ? (
-            <img
-  src={`http://localhost:4000${user.avatarUrl}`} // nối base URL
-  alt="avatar"
-  style={{ width: 40, height: 40, borderRadius: "50%" }}
-/>
+            <td>
+  {user.avatarUrl ? (
+    <img
+      src={user.avatarUrl}
+      alt="avatar"
+      style={{ width: 40, height: 40, borderRadius: "50%" }}
+    />
+  ) : (
+    "–"
+  )}
+</td>
+
           ) : (
             "–"
           )}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { login } from "../api/authAPI";
 import { saveToken } from "../utils/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "../App.css";
 
 function LoginForm({ setIsLoggedIn, setRole }) {
@@ -61,7 +61,15 @@ function LoginForm({ setIsLoggedIn, setRole }) {
         required
       />
       <button type="submit">Đăng nhập</button>
+      
+<Link to="/forgot-password">
+            <button type="button" className="secondary-btn">
+              🔑 Quên mật khẩu?
+            </button>
+          </Link>
       <p>{message}</p>
+      
+
     </form>
   );
 }
