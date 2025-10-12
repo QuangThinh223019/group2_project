@@ -2,8 +2,6 @@ const router = require('express').Router();
 const auth = require('../middlewares/auth');
 const rbac = require('../middlewares/rbac');
 const ctrl = require('../controllers/user.controller');
-const upload = require('../middlewares/upload');          // multer
-const userCtrl = require('../controllers/user.controller');
 
 // Thêm user vẫn cần admin
 router.post('/', auth(), rbac('admin'), ctrl.addUser);
@@ -19,7 +17,5 @@ router.delete('/:id', auth(), ctrl.deleteUser); // admin hoặc tự xoá trong 
 // **Cập nhật user - chỉ admin**
 router.put('/:id', auth(), rbac('admin'), ctrl.updateUser);
 
-//Upload avatar cho user
-router.post('/me/avatar', auth, upload.single('avatar'), userCtrl.uploadAvatar);
 
 module.exports = router;
