@@ -14,9 +14,6 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// ✅ Cho phép frontend load ảnh trong thư mục uploads
-app.use('/uploads', express.static('uploads'));
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
