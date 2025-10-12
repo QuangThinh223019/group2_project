@@ -18,7 +18,6 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/users', require('./routes/user.routes'));
 app.use('/uploads', express.static('uploads'));
 
 
