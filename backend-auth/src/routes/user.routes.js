@@ -8,4 +8,5 @@ router.get('/',    auth(), rbac('admin'), ctrl.listUsers);//lấy ds
 router.put('/:id', auth(), rbac('admin'), ctrl.updateUser);//cập nhật
 router.delete('/:id', auth(), rbac('admin'), ctrl.deleteUser);//xóa 
 
+
 module.exports = router;
