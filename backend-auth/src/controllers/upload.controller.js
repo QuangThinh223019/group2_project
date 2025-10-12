@@ -1,50 +1,58 @@
-// src/controllers/upload.controller.js
-const path = require('path');
-const fs = require('fs');
 const sharp = require('sharp');
+const cloudinary = require('../config/cloudinary');
 const User = require('../models/User');
 
-exports.uploadAvatarLocal = async (req, res) => {
+exports.uploadAvatarCloudinary = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'Chưa chọn file' });
 
-    const inputPath = req.file.path; // file do multer tạo ra (tạm thời)
-    // Tên file đích: .webp, vuông 512px
-    const baseName = path.basename(inputPath, path.extname(inputPath));
-    const outputName = `${baseName}.webp`;
-    const outputPath = path.join(path.dirname(inputPath), outputName);
-
-    // Resize vuông 512x512, cover, xuất .webp
-    await sharp(inputPath)
+    // 1) Chuẩn hoá ảnh (vuông 512, webp) ngay trong RAM
+    const processed = await sharp(req.file.buffer)
       .resize(512, 512, { fit: 'cover', position: 'center' })
       .webp({ quality: 80 })
-      .toFile(outputPath);
+      .toBuffer();
 
-    // Xoá file gốc (jpg/png/avif) để tiết kiệm dung lượng
-    if (inputPath !== outputPath && fs.existsSync(inputPath)) {
-      fs.unlinkSync(inputPath);
-    }
+    // 2) Upload lên Cloudinary bằng upload_stream
+    const folder = process.env.CLOUDINARY_FOLDER || 'avatars';
 
-    // URL public (đã bật static /uploads)
-    const publicUrl = `/uploads/avatars/${outputName}`;
+    const upload = () =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder,
+            resource_type: 'image',
+            format: 'webp', // đảm bảo đuôi webp
+            overwrite: true,
+            transformation: [] // đã resize bằng sharp; để trống cho nhanh
+          },
+          (err, result) => (err ? reject(err) : resolve(result))
+        );
+        stream.end(processed);
+      });
 
-    // Lưu vào DB cho user hiện tại
+    const result = await upload(); // { secure_url, public_id, ... }
+
+    // 3) Lưu URL + public_id vào DB user
     let user = null;
     if (req.user?.id) {
       user = await User.findByIdAndUpdate(
         req.user.id,
-        { avatarUrl: publicUrl },
+        {
+          avatarUrl: result.secure_url,
+          avatarPublicId: result.public_id // gợi ý thêm field này để sau xoá/thay
+        },
         { new: true, select: '-password -resetToken -resetTokenExp' }
       );
     }
 
     return res.json({
-      message: 'Upload avatar thành công (local)',
-      url: publicUrl,
+      message: 'Upload avatar thành công (Cloudinary)',
+      url: result.secure_url,
+      public_id: result.public_id,
       user
     });
   } catch (err) {
-    console.error('Upload avatar (local) error:', err);
-    return res.status(500).json({ message: 'Lỗi upload avatar (local)' });
+    console.error('Upload avatar (cloudinary) error:', err);
+    return res.status(500).json({ message: 'Lỗi upload avatar (Cloudinary)' });
   }
 };
