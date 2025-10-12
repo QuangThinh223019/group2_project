@@ -1,6 +1,4 @@
-const fs = require('fs');
 const User = require('../models/User');
-const cloudinary = require('../utils/cloudinary');
 const bcrypt = require('bcrypt');
 
 // Danh sách user
