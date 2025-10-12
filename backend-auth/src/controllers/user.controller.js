@@ -67,30 +67,43 @@ exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'Thiếu file avatar' });
 
-    const userId = req.user.id; // từ middleware auth
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User không tồn tại' });
+    // 1) Nén/resize trong RAM (rất nhanh)
+    const buffer = await sharp(req.file.buffer)
+      .rotate()                         // auto rotate theo EXIF
+      .resize(512, 512, { fit: 'inside' })
+      .toFormat('webp', { quality: 80 }) // giảm kích thước mạnh
+      .toBuffer();
 
-    // Upload lên Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'avatars',
-      transformation: [{ width: 512, height: 512, crop: 'limit' }],
+    // 2) Stream thẳng lên Cloudinary (không ghi file tạm)
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'avatars',
+          resource_type: 'image'
+          // Đừng eager transform lúc upload để khỏi chậm:
+          // eager: [{ width: 256, crop: 'limit' }], eager_async: true
+        },
+        (err, resUpload) => (err ? reject(err) : resolve(resUpload))
+      );
+      streamifier.createReadStream(buffer).pipe(stream);
     });
 
-    // Xóa file tạm local
-    fs.unlinkSync(req.file.path);
+    // 3) Lưu URL vào DB
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User không tồn tại' });
 
-    // Cập nhật DB
+    // (tuỳ chọn) Xoá ảnh cũ trên Cloudinary
+    if (user.avatarPublicId) {
+      cloudinary.uploader.destroy(user.avatarPublicId).catch(()=>{});
+    }
+
     user.avatarUrl = result.secure_url;
     user.avatarPublicId = result.public_id;
     await user.save();
 
-    res.json({
-      message: 'Cập nhật avatar thành công',
-      avatarUrl: user.avatarUrl,
-    });
-  } catch (err) {
-    console.error('uploadAvatar error:', err);
+    res.json({ message: 'Cập nhật avatar thành công', avatarUrl: user.avatarUrl });
+  } catch (e) {
+    console.error('uploadAvatar error:', e);
     res.status(500).json({ message: 'Lỗi upload avatar' });
   }
 };
