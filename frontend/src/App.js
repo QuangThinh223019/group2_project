@@ -5,20 +5,33 @@ import LoginPage from "./pages/LoginPage";
 import LogoutButton from "./components/LogoutButton";
 import AddUser from "./components/AddUser";
 import UserList from "./components/UserList";
+import Profile from "./components/Profile";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+
 import "./App.css";
 
 function App() {
   const [refresh, setRefresh] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [editingUser, setEditingUser] = useState(null); // user đang sửa
+  const [role, setRole] = useState(localStorage.getItem("role") || "");
+  const [editingUser, setEditingUser] = useState(null);
+  const [loading, setLoading] = useState(true); // 🟢 trạng thái chờ load token
 
   const role = localStorage.getItem("role"); 
   // kiểm tra token khi load App
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const savedRole = localStorage.getItem("role");
+
     if (token) setIsLoggedIn(true);
+    if (savedRole) setRole(savedRole.toLowerCase());
+
+    // sau khi kiểm tra xong thì tắt loading
+    setLoading(false);
   }, []);
 
+  
   return (
     <BrowserRouter>
       <div className="container">

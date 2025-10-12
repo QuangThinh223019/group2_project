@@ -1,26 +1,34 @@
 import React, { useState } from "react";
 import { login } from "../api/authAPI";
 import { saveToken } from "../utils/auth";
-import { useNavigate } from "react-router-dom";
-import "../App.css"; // import CSS
+import { useNavigate, Link } from "react-router-dom";
+import "../App.css";
 
-function LoginForm({ setIsLoggedIn }) {
+function LoginForm({ setIsLoggedIn, setRole }) {
   const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-  
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await login(form);
-      saveToken(res.data.token);
-      setMessage("🎉 Đăng nhập thành công!");
-      setSuccess(true); // đánh dấu đăng nhập thành công
+      const { token, user } = res.data;
+
+      // 🟢 Lưu token + role (chắc chắn là chữ thường)
+      saveToken(token);
+      localStorage.setItem("role", user.role.toLowerCase());
+      localStorage.setItem("userId", user._id);
+      setRole(user.role.toLowerCase());
+
+      
       setIsLoggedIn(true);
+      setMessage("🎉 Đăng nhập thành công!");
+      setSuccess(true);
 
       // tạm lưu role trong localStorage
     const role = form.email.includes("admin") ? "admin" : "user";
@@ -28,7 +36,11 @@ function LoginForm({ setIsLoggedIn }) {
 
       // Hiện thông báo 1.5s rồi redirect
       setTimeout(() => {
-        navigate("/"); 
+        if (user.role.toLowerCase() === "admin") {
+          navigate("/admin"); // admin
+        } else {
+          navigate("/profile"); // user thường
+        }
       }, 1500);
     } catch (error) {
       setMessage("❌ Sai email hoặc mật khẩu!");
@@ -39,10 +51,29 @@ function LoginForm({ setIsLoggedIn }) {
   return (
     <form onSubmit={handleSubmit} className="form-container">
       <h2>Đăng nhập</h2>
-      <input name="email" placeholder="Email" onChange={handleChange} required />
-      <input name="password" type="password" placeholder="Mật khẩu" onChange={handleChange} required />
+      <input
+        name="email"
+        placeholder="Email"
+        onChange={handleChange}
+        required
+      />
+      <input
+        name="password"
+        type="password"
+        placeholder="Mật khẩu"
+        onChange={handleChange}
+        required
+      />
       <button type="submit">Đăng nhập</button>
+      
+<Link to="/forgot-password">
+            <button type="button" className="secondary-btn">
+              🔑 Quên mật khẩu?
+            </button>
+          </Link>
       <p>{message}</p>
+      
+
     </form>
   );
 }

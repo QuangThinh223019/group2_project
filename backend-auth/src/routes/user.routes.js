@@ -9,4 +9,8 @@ router.put('/:id', auth(), rbac('admin'), ctrl.updateUser);//cập nhật
 router.delete('/:id', auth(), rbac('admin'), ctrl.deleteUser);//xóa 
 
 
+// **Cập nhật user - chỉ admin**
+router.put('/:id', auth(), rbac('admin'), ctrl.updateUser);
+
+
 module.exports = router;
