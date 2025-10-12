@@ -96,3 +96,18 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server error', detail: err.message });
   }
 };
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    const file = req.file.path;
+    const result = await cloudinary.uploader.upload(file);
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatar: result.secure_url },
+      { new: true }
+    );
+    res.json({ message: "Upload thành công", avatarUrl: user.avatar });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi upload", error });
+  }
+};
