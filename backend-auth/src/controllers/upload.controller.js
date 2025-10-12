@@ -14,22 +14,21 @@ exports.uploadAvatarLocal = async (req, res) => {
     const outputName = `${baseName}.webp`;
     const outputPath = path.join(path.dirname(inputPath), outputName);
 
-    // Resize/crop về vuông 512 và chuyển WEBP để nhẹ & đồng nhất
+    // Resize vuông 512x512, cover, xuất .webp
     await sharp(inputPath)
-      .resize(512, 512, { fit: 'cover' })
-      .toFormat('webp')
+      .resize(512, 512, { fit: 'cover', position: 'center' })
+      .webp({ quality: 80 })
       .toFile(outputPath);
 
-    // Xoá file gốc (không còn cần thiết)
-    if (outputPath !== inputPath && fs.existsSync(inputPath)) {
+    // Xoá file gốc (jpg/png/avif) để tiết kiệm dung lượng
+    if (inputPath !== outputPath && fs.existsSync(inputPath)) {
       fs.unlinkSync(inputPath);
     }
 
-    // Tạo URL public: /uploads/avatars/<file.webp>
-    const serverUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 4000}`;
-    const publicUrl = `${serverUrl}/uploads/avatars/${outputName}`;
+    // URL public (đã bật static /uploads)
+    const publicUrl = `/uploads/avatars/${outputName}`;
 
-    // Lưu avatarUrl vào DB (nếu có auth -> req.user.id)
+    // Lưu vào DB cho user hiện tại
     let user = null;
     if (req.user?.id) {
       user = await User.findByIdAndUpdate(
