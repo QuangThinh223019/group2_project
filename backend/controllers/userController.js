@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
-// GET /users
+// 📌 GET /users
 exports.getUsers = async (req, res) => {
   try {
     const users = await User.find().lean();
@@ -11,31 +11,61 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// POST /users
+// 📌 POST /users
 exports.createUser = async (req, res) => {
   try {
-    const { name, email } = req.body;
-    if (!name?.trim() || !email?.trim()) {
-      return res.status(400).json({ message: 'Name và Email là bắt buộc' });
+    const { name, email, password, role } = req.body;
+
+    if (!name?.trim() || !email?.trim() || !password?.trim()) {
+      return res.status(400).json({ message: 'Name, Email và Password là bắt buộc' });
     }
-    const user = await User.create({ name: name.trim(), email: email.trim() });
-    res.status(201).json(user);
+
+    // Kiểm tra email trùng
+    const existing = await User.findOne({ email: email.trim() });
+    if (existing) {
+      return res.status(400).json({ message: 'Email đã tồn tại' });
+    }
+
+    // Nếu có role gửi lên và là "admin"
+    // if (role === "admin") {
+    //   // ✅ Chỉ admin mới được phép tạo admin
+    //   if (!req.user || req.user.role !== "admin") {
+    //     return res.status(403).json({ message: "Bạn không có quyền tạo tài khoản admin" });
+    //   }
+    // }
+
+    // Tạo user mới (mặc định role = user nếu không gửi)
+    const user = await User.create({
+      name: name.trim(),
+      email: email.trim(),
+      password: password.trim(),
+      role: role === "admin" ? "admin" : "user",
+    });
+
+    res.status(201).json({ message: 'Tạo user thành công', user });
   } catch (err) {
     res.status(500).json({ message: 'Server error', detail: err.message });
   }
 };
 
-// PUT /users/:id
+// 📌 PUT /users/:id
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'ID không hợp liệu' });
+      return res.status(400).json({ message: 'ID không hợp lệ' });
     }
 
     const updates = {};
     if (req.body.name !== undefined) updates.name = req.body.name;
     if (req.body.email !== undefined) updates.email = req.body.email;
+    if (req.body.role !== undefined) {
+      // Chỉ admin mới được chỉnh role người khác
+      if (!req.user || req.user.role !== "admin") {
+        return res.status(403).json({ message: "Bạn không có quyền thay đổi vai trò người dùng" });
+      }
+      updates.role = req.body.role;
+    }
 
     const updated = await User.findByIdAndUpdate(
       id,
@@ -50,7 +80,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// DELETE /users/:id
+// 📌 DELETE /users/:id
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -66,3 +96,4 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server error', detail: err.message });
   }
 };
+

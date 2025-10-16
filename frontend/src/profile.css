@@ -1,0 +1,137 @@
+.profile-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: #f0f4f8;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: white;
+  text-align: center;
+  padding: 20px 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  width: 300px;
+}
+
+.form-container h2 {
+  margin-bottom: 10px;
+}
+
+.avatar-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  margin: 0 auto 10px auto; /* căn giữa */
+  display: block;
+}
+
+.form-container input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-right: 200px;
+}
+
+.password-input-wrapper input {
+  padding-right: 50px;
+  flex: 1;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 5px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 6px;
+}
+
+.password-toggle-btn:hover {
+  background: #f0f0f0;
+  border-color: #007bff;
+}
+
+button[type="submit"], .form-container-btn {
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+
+button[type="submit"]:hover, .form-container-btn:hover {
+  background: #0056b3;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.message {
+  color: red;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.message.success {
+  color: green;
+}
+
+.logout-btn {
+  padding: 8px;          /* nhỏ hơn nút chính */
+  background: #007bff;
+  color: white;
+  border: none;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 200px;          /* nhỏ hơn nút Cập nhật */
+  display: block;
+  margin: 15px auto;     /* căn giữa */
+  font-size: 14px;       /* nhỏ hơn */
+  transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #0056b3;
+}
+
+.back-button {
+  background-color: #007bff;
+  color: white;
+  padding: 6px 12px;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
