@@ -7,6 +7,7 @@ function LogoutButton({ setIsLoggedIn }) {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("role");
     setIsLoggedIn(false);
     alert("✅ Đăng xuất thành công!");

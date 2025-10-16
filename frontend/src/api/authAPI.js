@@ -11,6 +11,10 @@ export const login = async (data) => {
 return axios.post(`${API_URL}/login`, data);
 };
 
+// 🟢 Thêm API mới để xin access token mới
+export const refreshToken = async (refreshToken) =>
+  axios.post(`${API_URL}/refresh`, { refreshToken });
+
 export const logout = async () => {
   // Có thể chỉ cần xóa token phía client, hoặc gọi API nếu backend hỗ trợ
 return axios.post(`${API_URL}/logout`);

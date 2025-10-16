@@ -4,41 +4,92 @@ import { useNavigate } from "react-router-dom";
 import "../App.css"; // import CSS
 
 function SignupForm() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    await signup(form);
-    setMessage("🎉 Đăng ký thành công!");
-    setSuccess(true);
-    setForm({ name: "", email: "", password: "" });
+    e.preventDefault();
 
-    // redirect sau 1.5 giây về login
-    setTimeout(() => {
-      navigate("/login");
-    }, 1500);
-  } catch (error) {
-    setMessage("❌ Lỗi: Email đã tồn tại hoặc server lỗi.");
-    setSuccess(false);
-  }
-};
+    // 🔒 Kiểm tra mật khẩu trùng khớp
+    if (form.password !== form.confirmPassword) {
+      setMessage("❌ Mật khẩu nhập lại không khớp!");
+      setSuccess(false);
+      return;
+    }
+
+    try {
+      await signup({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
+      setMessage("🎉 Đăng ký thành công!");
+      setSuccess(true);
+      setForm({ name: "", email: "", password: "", confirmPassword: "" });
+
+      // ⏳ Chờ 1.5s rồi chuyển sang trang đăng nhập
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (error) {
+      setMessage("❌ Lỗi: Email đã tồn tại hoặc server lỗi.");
+      setSuccess(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="form-container">
       <h2>Đăng ký</h2>
-      <input name="name" placeholder="Tên" value={form.name} onChange={handleChange} required />
-      <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-      <input name="password" type="password" placeholder="Mật khẩu" value={form.password} onChange={handleChange} required />
+      <input
+        name="name"
+        placeholder="Tên"
+        value={form.name}
+        onChange={handleChange}
+        required
+      />
+      <input
+        name="email"
+        placeholder="Email"
+        value={form.email}
+        onChange={handleChange}
+        required
+      />
+      <input
+        name="password"
+        type="password"
+        placeholder="Mật khẩu"
+        value={form.password}
+        onChange={handleChange}
+        required
+      />
+      {/* 🆕 Thêm ô nhập lại mật khẩu */}
+      <input
+        name="confirmPassword"
+        type="password"
+        placeholder="Nhập lại mật khẩu"
+        value={form.confirmPassword}
+        onChange={handleChange}
+        required
+      />
+
       <button type="submit">Đăng ký</button>
-      {/* Thông báo thành công / lỗi đặt ngay dưới button */}
-  {message && (
-    <p className={success ? "message-success" : "message-error"}>{message}</p>
-  )}
+
+      {/* Thông báo thành công / lỗi */}
+      {message && (
+        <p className={success ? "message-success" : "message-error"}>
+          {message}
+        </p>
+      )}
     </form>
   );
 }
