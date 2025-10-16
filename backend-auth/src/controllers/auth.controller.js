@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
-const RefreshToken = require('../models/RefreshToken'); 
+const RefreshToken = require('../models/RefreshToken');
 
 const signAccessToken = (user) =>
   jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
@@ -18,8 +18,7 @@ exports.signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const exists = await User.findOne({ email });
-    if (exists)
-      return res.status(409).json({ message: 'Email đã tồn tại' });
+    if (exists) return res.status(409).json({ message: 'Email đã tồn tại' });
 
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hash });
@@ -27,8 +26,7 @@ exports.signup = async (req, res) => {
     const accessToken = signAccessToken(user);
     const refreshToken = signRefreshToken(user);
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await RefreshToken.create({ user: user._id, token: refreshToken, expiresAt });
 
     res.status(201).json({
@@ -38,7 +36,7 @@ exports.signup = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    console.error(err);
+    console.error('Signup error:', err);
     res.status(500).json({ message: 'Lỗi server khi đăng ký' });
   }
 };
@@ -47,33 +45,36 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
-    if (!user)
-      return res.status(400).json({ message: 'Sai email hoặc mật khẩu' });
+    if (!user) return res.status(400).json({ message: 'Sai email hoặc mật khẩu' });
 
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok)
-      return res.status(400).json({ message: 'Sai email hoặc mật khẩu' });
+    if (!ok) return res.status(400).json({ message: 'Sai email hoặc mật khẩu' });
 
     const accessToken = signAccessToken(user);
     const refreshToken = signRefreshToken(user);
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await RefreshToken.create({ user: user._id, token: refreshToken, expiresAt });
 
     res.json({
       message: 'Đăng nhập thành công',
       accessToken,
       refreshToken,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, avatarUrl: user.avatarUrl },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+      },
     });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Lỗi server khi đăng nhập' });
   }
 };
 
-exports.refresh = async (req, res) => {
+exports.refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken)
@@ -92,11 +93,9 @@ exports.refresh = async (req, res) => {
       const newAccessToken = signAccessToken(user);
       const newRefreshToken = signRefreshToken(user);
 
-      // Xoá token cũ, thêm token mới
       await RefreshToken.findOneAndDelete({ token: refreshToken });
 
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       await RefreshToken.create({ user: user._id, token: newRefreshToken, expiresAt });
 
       res.json({
@@ -106,7 +105,7 @@ exports.refresh = async (req, res) => {
       });
     });
   } catch (err) {
-    console.error(err);
+    console.error('Refresh token error:', err);
     res.status(500).json({ message: 'Lỗi server khi refresh token' });
   }
 };
@@ -118,10 +117,9 @@ exports.logout = async (req, res) => {
       return res.status(400).json({ message: 'Thiếu refresh token' });
 
     await RefreshToken.findOneAndDelete({ token: refreshToken });
-
     res.json({ message: 'Đăng xuất thành công – Refresh token đã bị xóa' });
   } catch (err) {
-    console.error(err);
+    console.error('Logout error:', err);
     res.status(500).json({ message: 'Lỗi server khi đăng xuất' });
   }
 };
@@ -135,13 +133,12 @@ exports.forgotPassword = async (req, res) => {
 
     const token = crypto.randomBytes(32).toString('hex');
     user.resetToken = token;
-    user.resetTokenExp = new Date(Date.now() + 1000 * 60 * 15); // 15 phút
+    user.resetTokenExp = new Date(Date.now() + 15 * 60 * 1000); 
     await user.save();
 
-    // TODO: Gửi email thật bằng Nodemailer (SV3 có thể tích hợp thêm)
     res.json({ message: 'Token đặt lại mật khẩu đã được tạo', token });
   } catch (err) {
-    console.error(err);
+    console.error('Forgot password error:', err);
     res.status(500).json({ message: 'Lỗi khi tạo token reset password' });
   }
 };
@@ -164,7 +161,7 @@ exports.resetPassword = async (req, res) => {
 
     res.json({ message: 'Đổi mật khẩu thành công' });
   } catch (err) {
-    console.error(err);
+    console.error('Reset password error:', err);
     res.status(500).json({ message: 'Lỗi khi đổi mật khẩu' });
   }
 };
