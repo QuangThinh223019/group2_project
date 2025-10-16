@@ -11,7 +11,7 @@ const signAccessToken = (user) =>
 
 const signRefreshToken = (user) =>
   jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: '7d',
+    expiresIn: '30s',
   });
 
 exports.signup = async (req, res) => {
