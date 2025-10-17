@@ -6,12 +6,12 @@ const RefreshToken = require('../models/RefreshToken');
 
 const signAccessToken = (user) =>
   jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: '15m',
+    expiresIn: '1m',
   });
 
 const signRefreshToken = (user) =>
   jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: '30s',
+    expiresIn: '7d',
   });
 
 exports.signup = async (req, res) => {
