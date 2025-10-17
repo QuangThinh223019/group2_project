@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { getAllUsers, deleteUser } from "../api/userAPI";
 import "../App.css";
 
 function UserList({ refresh, onEditUser }) {
@@ -10,54 +10,47 @@ function UserList({ refresh, onEditUser }) {
   const role = localStorage.getItem("role");
   
   const fetchUsers = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
     try {
-      const res = await axios.get("http://localhost:4000/api/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data);
+      const data = await getAllUsers();
+      setUsers(data);
     } catch (err) {
-  console.error("Lỗi khi load user:", err);
-  setMessage("⚠️ Không thể tải danh sách user!");
-  setSuccess(false);
-}
+      console.error("Lỗi khi load user:", err);
+      setMessage("⚠️ Không thể tải danh sách user!");
+      setSuccess(false);
+    }
   };
 
   useEffect(() => { fetchUsers(); }, [refresh]);
 
   const handleDelete = async (id) => {
-  // Check nếu admin đang xóa chính mình, không gửi request
-  if (role === "admin" && String(id) === String(currentUserId)) {
-    setMessage("⚠️ Bạn không thể xóa chính mình!");
-    setSuccess(false);
-    setTimeout(() => setMessage(""), 2000);
-    return;
-  }
-
-  if (!window.confirm("Bạn có chắc muốn xóa user này?")) return;
-
-  const token = localStorage.getItem("token");
-  try {
-    await axios.delete(`http://localhost:4000/api/users/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setUsers(users.filter(u => u._id !== id));
-    setMessage("🎉 Xóa user thành công!");
-    setSuccess(true);
-    setTimeout(() => setMessage(""), 1500);
-  } catch (err) {
-    console.error(err);
-    // Bắt lỗi 403 từ backend
-    if (err.response && err.response.status === 403) {
-      setMessage(err.response.data.message || "❌ Bạn không thể thực hiện thao tác này!");
-    } else {
-      setMessage("❌ Xóa user thất bại!");
+    // Check nếu admin đang xóa chính mình, không gửi request
+    if (role === "admin" && String(id) === String(currentUserId)) {
+      setMessage("⚠️ Bạn không thể xóa chính mình!");
+      setSuccess(false);
+      setTimeout(() => setMessage(""), 2000);
+      return;
     }
-    setSuccess(false);
-    setTimeout(() => setMessage(""), 1500);
-  }
-};
+
+    if (!window.confirm("Bạn có chắc muốn xóa user này?")) return;
+
+    try {
+      await deleteUser(id);
+      setUsers(users.filter(u => u._id !== id));
+      setMessage("🎉 Xóa user thành công!");
+      setSuccess(true);
+      setTimeout(() => setMessage(""), 1500);
+    } catch (err) {
+      console.error(err);
+      // Bắt lỗi 403 từ backend
+      if (err.response && err.response.status === 403) {
+        setMessage(err.response.data.message || "❌ Bạn không thể thực hiện thao tác này!");
+      } else {
+        setMessage("❌ Xóa user thất bại!");
+      }
+      setSuccess(false);
+      setTimeout(() => setMessage(""), 1500);
+    }
+  };
 
 
   return (

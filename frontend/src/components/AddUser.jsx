@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { createUser, updateUser } from "../api/userAPI";
 import "../App.css";
 
 function AddUser({ onUserAdded, editingUser, onCancelEdit }) {
@@ -31,24 +31,13 @@ function AddUser({ onUserAdded, editingUser, onCancelEdit }) {
     if (!/\S+@\S+\.\S+/.test(email)) return setMessage("Email không hợp lệ");
     if (!password.trim()) return setMessage("Password không được để trống");
 
-    const token = localStorage.getItem("token");
-    if (!token) return setMessage("Hãy đăng nhập trước khi thêm user");
-
     try {
       if (editingUser) {
-        await axios.put(
-          `http://localhost:4000/api/users/${editingUser._id}`,
-          { name, email, password, role },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await updateUser(editingUser._id, { name, email, password, role });
         setMessage("Cập nhật user thành công! 😎");
         setSuccess(true);
       } else {
-        await axios.post(
-          "http://localhost:4000/api/users",
-          { name, email, password, role },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await createUser({ name, email, password, role });
         setMessage("Thêm user thành công!");
         setSuccess(true);
       }

@@ -8,6 +8,7 @@ import UserList from "./components/UserList";
 import Profile from "./components/Profile";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+
 import "./App.css";
 
 function App() {
@@ -15,63 +16,124 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState(localStorage.getItem("role") || "");
   const [editingUser, setEditingUser] = useState(null);
-  const [loading, setLoading] = useState(true); // trạng thái chờ load token
+  const [loading, setLoading] = useState(true);
 
   // kiểm tra token khi load App
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const savedRole = localStorage.getItem("role");
+    const accessToken = localStorage.getItem("accessToken");
+    const oldToken = localStorage.getItem("token");
+    
+    console.log("🔍 [App] Checking auth on load:", { 
+      hasAccessToken: !!accessToken, 
+      hasOldToken: !!oldToken 
+    });
+    
+    // Xóa token cũ (từ version trước) nếu tồn tại, nhưng GIỮ accessToken
+    if (oldToken) {
+      localStorage.removeItem("token");
+      console.log("🗑️ Đã xóa token cũ");
+    }
+    
+    // Nếu KHÔNG có accessToken -> chưa đăng nhập
+    if (!accessToken) {
+      console.log("❌ [App] Không có accessToken -> Chưa đăng nhập");
+      setIsLoggedIn(false);
+      setRole("");
+      setLoading(false);
+      return;
+    }
 
-    if (token) setIsLoggedIn(true);
+    // Có accessToken -> đã đăng nhập
+    const savedRole = localStorage.getItem("role");
+    console.log("✅ [App] Có accessToken -> Đã đăng nhập, role:", savedRole);
     if (savedRole) setRole(savedRole.toLowerCase());
+    setIsLoggedIn(true);
 
     // sau khi kiểm tra xong thì tắt loading
     setLoading(false);
   }, []);
 
-  if (loading) return <p>Đang tải...</p>; // tránh hiển thị sớm khi chưa kiểm tra token
+  
+  // Đợi check auth xong mới render routes
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <p>Đang tải...</p>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
       <div className="container">
         <h1>🚀 Quản lý User</h1>
-
+        
+        
         <Routes>
           <Route path="/signup" element={<SignupPage />} />
-<Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} setRole={setRole} />} />
-
+          <Route 
+            path="/login" 
+            element={<LoginPage setIsLoggedIn={setIsLoggedIn} setRole={setRole} />} 
+          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
           <Route
-            path="/"
+            path="/profile"
             element={
               isLoggedIn ? (
+                <Profile />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          
+          <Route
+            path="/admin"
+            element={
+              isLoggedIn && role === "admin" ? (
                 <>
-                  {role === "admin" && (
-                    <>
-                      <AddUser
-                        editingUser={editingUser}
-                        onUserAdded={() => setRefresh((r) => r + 1)}
-                        onCancelEdit={() => setEditingUser(null)}
-                      />
-                      <UserList
-                        refresh={refresh}
-                        onEditUser={(user) => setEditingUser(user)}
-                      />
-                    </>
-                  )}
-
-                  {role !== "admin" && (
-                    <p>Chào bạn, bạn không có quyền xem danh sách user.</p>
-                  )}
-
-                  <LogoutButton setIsLoggedIn={setIsLoggedIn} />
+                  <AddUser
+                    editingUser={editingUser}
+                    onUserAdded={() => setRefresh(r => r + 1)}
+                    onCancelEdit={() => setEditingUser(null)}
+                  />
+                  <UserList
+                    refresh={refresh}
+                    onEditUser={(user) => setEditingUser(user)}
+                  />
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
+                    <button 
+                      onClick={() => window.location.href = '/profile'}
+                      className="logout-btn"
+                    >
+                      👤 Xem Profile
+                    </button>
+                    <LogoutButton setIsLoggedIn={setIsLoggedIn} />
+                  </div>
                 </>
               ) : (
                 <Navigate to="/login" replace />
               )
             }
           />
-        </Routes>
 
+          <Route
+            path="/"
+            element={
+              isLoggedIn ? (
+                role === "admin" ? (
+                  <Navigate to="/admin" replace />
+                ) : (
+                  <Navigate to="/profile" replace />
+                )
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+        </Routes>
         <nav>
           {!isLoggedIn && (
             <>
@@ -79,6 +141,7 @@ function App() {
               <Link to="/login" className="nav-btn">Đăng nhập</Link>
             </>
           )}
+          
         </nav>
       </div>
     </BrowserRouter>

@@ -72,6 +72,14 @@ function ForgotPassword() {
               </button>
             </Link>
           </p>
+
+          <p>
+            <Link to="/login">
+              <button type="button" className="secondary-btn">
+                ⬅️ Quay lại
+              </button>
+            </Link>
+          </p>
         </form>
 
         {message && <p className="message">{message}</p>}
