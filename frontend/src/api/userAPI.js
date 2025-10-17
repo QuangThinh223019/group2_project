@@ -1,14 +1,15 @@
+// src/api/userAPI.js
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/profile";
+const API_URL = "http://localhost:4000/api/users";
 
-// Tạo axios instance cho profile API với interceptor tự động refresh token
-const profileAPI = axios.create({
+// Tạo axios instance cho user API
+const userAPI = axios.create({
   baseURL: API_URL,
 });
 
 // Interceptor để tự động thêm accessToken vào header
-profileAPI.interceptors.request.use(
+userAPI.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
@@ -20,35 +21,32 @@ profileAPI.interceptors.request.use(
 );
 
 // Interceptor để tự động refresh token khi accessToken hết hạn
-profileAPI.interceptors.response.use(
+userAPI.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 (Unauthorized) và chưa retry
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      console.log("🔄 [Profile] Token hết hạn, đang refresh...");
+      console.log("🔄 [User] Token hết hạn, đang refresh...");
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
         if (!refreshToken) {
-          console.error("❌ [Profile] Không có refreshToken");
+          console.error("❌ [User] Không có refreshToken");
           throw new Error("No refresh token");
         }
 
-        console.log("📤 [Profile] Gọi API refresh token...");
-        // Gọi API refresh token
+        console.log("📤 [User] Gọi API refresh token...");
         const response = await axios.post("http://localhost:4000/api/auth/refresh", {
           refreshToken,
         });
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
-        console.log("✅ [Profile] Refresh thành công! Token mới:", accessToken.substring(0, 30) + "...");
-        console.log("📋 [Profile] Full token mới:", accessToken);
+        console.log("✅ [User] Refresh thành công! Token mới:", accessToken.substring(0, 30) + "...");
+        console.log("📋 [User] Full token mới:", accessToken);
 
-        // Lưu tokens mới
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", newRefreshToken);
 
@@ -56,8 +54,8 @@ profileAPI.interceptors.response.use(
         delete originalRequest.headers.Authorization;
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         
-        console.log("🔁 [Profile] Thử lại request với token mới...");
-        console.log("🔍 [Profile] Request config:", {
+        console.log("🔁 [User] Thử lại request với token mới...");
+        console.log("🔍 [User] Request config:", {
           url: originalRequest.url,
           baseURL: originalRequest.baseURL,
           headers: originalRequest.headers
@@ -72,13 +70,12 @@ profileAPI.interceptors.response.use(
           }
         };
         
-        console.log("🚀 [Profile] Retry config:", retryConfig);
+        console.log("🚀 [User] Retry config:", retryConfig);
         
-        // Retry với axios chứ không phải profileAPI để tránh loop
+        // Retry với axios chứ không phải userAPI để tránh loop
         return axios(retryConfig);
       } catch (refreshError) {
-        // Refresh token thất bại -> logout
-        console.error("❌ [Profile] Refresh token thất bại:", refreshError.response?.data || refreshError.message);
+        console.error("❌ [User] Refresh token thất bại:", refreshError.response?.data || refreshError.message);
         localStorage.clear();
         alert("⚠️ Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!");
         window.location.href = "/login";
@@ -90,13 +87,22 @@ profileAPI.interceptors.response.use(
   }
 );
 
-export const getProfile = async () => {
-  const res = await profileAPI.get("/");
+export const getAllUsers = async () => {
+  const res = await userAPI.get("/");
   return res.data;
 };
 
-export const updateProfile = async (data) => {
-  // data đã là FormData từ Profile.js
-  const res = await profileAPI.put("/", data);
+export const createUser = async (userData) => {
+  const res = await userAPI.post("/", userData);
+  return res.data;
+};
+
+export const updateUser = async (id, userData) => {
+  const res = await userAPI.put(`/${id}`, userData);
+  return res.data;
+};
+
+export const deleteUser = async (id) => {
+  const res = await userAPI.delete(`/${id}`);
   return res.data;
 };

@@ -1,15 +1,15 @@
-// src/api/authAPI.js
+// src/api/uploadAPI.js
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/auth"; // chỉnh theo backend
+const API_URL = "http://localhost:4000/api/upload";
 
-// Tạo axios instance để dễ quản lý
-export const authAPI = axios.create({
+// Tạo axios instance cho upload API
+const uploadAPI = axios.create({
   baseURL: API_URL,
 });
 
 // Interceptor để tự động thêm accessToken vào header
-authAPI.interceptors.request.use(
+uploadAPI.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
@@ -21,34 +21,31 @@ authAPI.interceptors.request.use(
 );
 
 // Interceptor để tự động refresh token khi accessToken hết hạn
-authAPI.interceptors.response.use(
+uploadAPI.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 (Unauthorized) và chưa retry
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      console.log("🔄 [Auth] Token hết hạn, đang refresh...");
+      console.log("🔄 [Upload] Token hết hạn, đang refresh...");
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
         if (!refreshToken) {
-          console.error("❌ [Auth] Không có refreshToken");
+          console.error("❌ [Upload] Không có refreshToken");
           throw new Error("No refresh token");
         }
 
-        console.log("📤 [Auth] Gọi API refresh token...");
-        // Gọi API refresh token
-        const response = await axios.post(`${API_URL}/refresh`, {
+        console.log("📤 [Upload] Gọi API refresh token...");
+        const response = await axios.post("http://localhost:4000/api/auth/refresh", {
           refreshToken,
         });
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
-        console.log("✅ [Auth] Refresh thành công!");
+        console.log("✅ [Upload] Refresh thành công!");
 
-        // Lưu tokens mới
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", newRefreshToken);
 
@@ -56,11 +53,10 @@ authAPI.interceptors.response.use(
         delete originalRequest.headers.Authorization;
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         
-        console.log("🔁 [Auth] Thử lại request với token mới...");
+        console.log("🔁 [Upload] Thử lại request với token mới...");
         return axios(originalRequest);
       } catch (refreshError) {
-        // Refresh token thất bại -> logout
-        console.error("❌ [Auth] Refresh token thất bại:", refreshError.response?.data || refreshError.message);
+        console.error("❌ [Upload] Refresh token thất bại:", refreshError.response?.data || refreshError.message);
         localStorage.clear();
         alert("⚠️ Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!");
         window.location.href = "/login";
@@ -72,19 +68,11 @@ authAPI.interceptors.response.use(
   }
 );
 
-export const signup = async (data) => {
-  return authAPI.post("/signup", data);
-};
-
-export const login = async (data) => {
-  return authAPI.post("/login", data);
-};
-
-export const logout = async () => {
-  const refreshToken = localStorage.getItem("refreshToken");
-  return authAPI.post("/logout", { refreshToken });
-};
-
-export const refreshTokenAPI = async (refreshToken) => {
-  return axios.post(`${API_URL}/refresh`, { refreshToken });
+export const uploadAvatar = async (formData) => {
+  const res = await uploadAPI.post("/avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
 };

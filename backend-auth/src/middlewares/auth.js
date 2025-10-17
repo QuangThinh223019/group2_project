@@ -6,7 +6,7 @@ module.exports = (required = true) => (req, res, next) => {
   if (!token && !required) return next();
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = { id: payload.id, role: payload.role };
     next();
   } catch {

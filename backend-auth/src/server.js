@@ -8,6 +8,7 @@ const userRoutes = require('./routes/user.routes');
 const profileRoutes = require('./routes/profile.routes');
 const uploadRoutes = require('./routes/upload.routes');
 
+
 const app = express();
 
 // Middleware

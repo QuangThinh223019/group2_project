@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { login } from "../api/authAPI";
-import { saveToken } from "../utils/auth";
+import { saveAuthData } from "../utils/auth";
 import { useNavigate, Link } from "react-router-dom";
 import "../App.css";
 
@@ -17,22 +17,17 @@ function LoginForm({ setIsLoggedIn, setRole }) {
     e.preventDefault();
     try {
       const res = await login(form);
-      const { token, user } = res.data;
-
-      // 🟢 Lưu token + role (chắc chắn là chữ thường)
-      saveToken(token);
-      localStorage.setItem("role", user.role.toLowerCase());
-      localStorage.setItem("userId", user._id);
-      setRole(user.role.toLowerCase());
-
       
+      // Backend trả về: accessToken, refreshToken, user
+      const { accessToken, refreshToken, user } = res.data;
+
+      // Lưu tất cả thông tin authentication
+      saveAuthData(accessToken, refreshToken, user);
+      setRole(user.role.toLowerCase());
       setIsLoggedIn(true);
+      
       setMessage("🎉 Đăng nhập thành công!");
       setSuccess(true);
-
-      // tạm lưu role trong localStorage
-    const role = form.email.includes("admin") ? "admin" : "user";
-    localStorage.setItem("role", role);
 
       // Hiện thông báo 1.5s rồi redirect
       setTimeout(() => {
@@ -43,7 +38,9 @@ function LoginForm({ setIsLoggedIn, setRole }) {
         }
       }, 1500);
     } catch (error) {
-      setMessage("❌ Sai email hoặc mật khẩu!");
+      console.error("Login error:", error);
+      const errorMessage = error.response?.data?.message || "❌ Sai email hoặc mật khẩu!";
+      setMessage(errorMessage);
       setSuccess(false);
     }
   };
