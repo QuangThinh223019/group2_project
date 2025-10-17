@@ -16,7 +16,7 @@ exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     if (req.user.role !== 'admin' && req.user.id !== id)
-      return res.status(403).json({ message: 'Forbidden' });
+      return res.status(403).json({ message: 'Không có quyền xoá user khác' });
 
     await User.findByIdAndDelete(id);
     res.json({ message: 'Đã xoá user' });
@@ -44,8 +44,8 @@ exports.updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email, role, password } = req.body;
 
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Chỉ admin mới được cập nhật user' });
+    if (req.user.role !== 'admin','moderator') {
+      return res.status(403).json({ message: 'Chỉ admin hoặc moderator mới được cập nhật user' });
     }
 
     const updateData = { name, email, role };
