@@ -15,6 +15,6 @@ router.get('/', auth(), rbac('admin'), ctrl.listUsers);
 router.delete('/:id', auth(), ctrl.deleteUser); // admin hoặc tự xoá trong controller
 
 // **Cập nhật user - chỉ admin**
-router.put('/:id', auth(), rbac('admin'), ctrl.updateUser);
+router.put('/:id', auth(), rbac('admin', 'moderator'), ctrl.updateUser);
 
 module.exports = router;
