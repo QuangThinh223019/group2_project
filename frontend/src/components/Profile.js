@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getProfile, updateProfile } from "../api/profileAPI";
+import { uploadAvatar } from "../api/uploadAPI";
 import { logout } from "../api/authAPI";
 import { removeAuthData } from "../utils/auth";
 import "../profile.css";
@@ -39,37 +40,41 @@ const userId = localStorage.getItem("userId");
     setLoading(true);
     setMessage("");
     try {
-      const formData = new FormData();
-      formData.append("name", name);
+      let avatarUrl = avatar;
 
-      if (currentPassword && newPassword) {
-        formData.append("currentPassword", currentPassword);
-        formData.append("newPassword", newPassword);
+      // Nếu người dùng chọn avatar mới, upload lên Cloudinary trước
+      if (avatar instanceof File) {
+        console.log("📤 Uploading avatar to Cloudinary...");
+        const uploadFormData = new FormData();
+        uploadFormData.append("avatar", avatar);
+        
+        const uploadResponse = await uploadAvatar(uploadFormData);
+        avatarUrl = uploadResponse.url; // URL từ Cloudinary
+        console.log("✅ Avatar uploaded to Cloudinary:", avatarUrl);
       }
 
-      // Nếu người dùng chọn avatar mới
-      if (avatar instanceof File) {
-        // Upload file trực tiếp, backend Multer sẽ lưu vào uploads/
-        formData.append("avatar", avatar);
-        console.log("📤 Uploading avatar to local storage...");
-      } else if (typeof avatar === "string") {
-        // Giữ avatar cũ (URL)
-        formData.append("avatarUrl", avatar);
+      // Cập nhật profile với avatar URL từ Cloudinary
+      const profileFormData = new FormData();
+      profileFormData.append("name", name);
+      if (avatarUrl) {
+        profileFormData.append("avatarUrl", avatarUrl);
+      }
+
+      if (currentPassword && newPassword) {
+        profileFormData.append("currentPassword", currentPassword);
+        profileFormData.append("newPassword", newPassword);
       }
 
       // Update profile
-      await updateProfile(formData);
-      console.log("✅ Profile updated");
+      await updateProfile(profileFormData);
+      console.log("✅ Profile updated with Cloudinary URL");
 
-      // Đợi 500ms để backend lưu file xong
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Fetch lại profile để lấy avatarUrl MỚI từ server
+      // Fetch lại profile để lấy data mới từ server
       const updatedProfile = await getProfile();
       console.log("🔍 Updated profile data:", updatedProfile);
       
-      // Set avatar thành URL mới từ server
-      const newAvatarUrl = updatedProfile.avatarUrl || updatedProfile.avatar || null;
+      // Set avatar thành URL từ Cloudinary
+      const newAvatarUrl = updatedProfile.avatarUrl || avatarUrl;
       setAvatar(newAvatarUrl);
       setName(updatedProfile.name || name);
       
