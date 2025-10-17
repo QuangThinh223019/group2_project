@@ -16,7 +16,7 @@ exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     if (req.user.role !== 'admin' && req.user.id !== id)
-      return res.status(403).json({ message: 'Forbidden' });
+      return res.status(403).json({ message: 'Không có quyền xoá user khác' });
 
     await User.findByIdAndDelete(id);
     res.json({ message: 'Đã xoá user' });
