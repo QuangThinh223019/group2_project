@@ -1,19 +1,29 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import "../App.css"; // import CSS
+import "../App.css";
 
 function ResetPassword() {
+  const { token: tokenFromUrl } = useParams();
   const [token, setToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (tokenFromUrl) setToken(tokenFromUrl);
+  }, [tokenFromUrl]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    if (newPassword !== confirmPassword) {
+      setMessage("❌ Mật khẩu nhập lại không khớp!");
+      return;
+    }
     setLoading(true);
-
     try {
       const res = await axios.post("http://localhost:4000/api/auth/reset-password", {
         token,
@@ -49,6 +59,14 @@ function ResetPassword() {
             required
             style={{ marginTop: "10px" }}
           />
+          <input
+            type="password"
+            placeholder="Nhập lại mật khẩu mới"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            style={{ marginTop: "10px" }}
+          />
 
           <button type="submit" disabled={loading} style={{ marginTop: "10px" }}>
             {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
@@ -60,6 +78,11 @@ function ResetPassword() {
             {message}
           </p>
         )}
+        <p style={{ marginTop: 16 }}>
+          <Link to="/login">
+            <button type="button" className="secondary-btn">⬅️ Quay lại đăng nhập</button>
+          </Link>
+        </p>
       </div>
     </div>
   );

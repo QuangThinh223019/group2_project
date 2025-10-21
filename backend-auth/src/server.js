@@ -20,7 +20,7 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/upload', uploadRoutes);   
+app.use('/api/upload', uploadRoutes);  
 app.use('/uploads', express.static('uploads'));
 
 
