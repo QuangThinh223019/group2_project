@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const RefreshToken = require('../models/RefreshToken');
+const transporter = require('../config/mailer');
 
 const signAccessToken = (user) =>
   jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
@@ -129,17 +130,34 @@ exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user)
-      return res.json({ message: 'Nếu email tồn tại, token đã được tạo' });
+      return res.json({ message: 'Nếu email tồn tại, token đã được gửi' });
 
+    // 1️⃣ Tạo token reset
     const token = crypto.randomBytes(32).toString('hex');
     user.resetToken = token;
-    user.resetTokenExp = new Date(Date.now() + 15 * 60 * 1000); 
+    user.resetTokenExp = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
-    res.json({ message: 'Token đặt lại mật khẩu đã được tạo', token });
+    // 2️⃣ Tạo URL reset (frontend)
+    const resetURL = `${process.env.CLIENT_URL}/reset-password/${token}`;
+
+    // 3️⃣ Gửi email thật
+    await transporter.sendMail({
+      from: `"User Management" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: 'Đặt lại mật khẩu của bạn',
+      html: `
+        <h3>Xin chào ${user.name || 'bạn'},</h3>
+        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng nhấn vào liên kết bên dưới để đặt lại mật khẩu (có hiệu lực 15 phút):</p>
+        <a href="${resetURL}" target="_blank">${resetURL}</a>
+        <p>Nếu bạn không yêu cầu hành động này, hãy bỏ qua email này.</p>
+      `,
+    });
+
+    res.json({ message: 'Email đặt lại mật khẩu đã được gửi thành công' });
   } catch (err) {
     console.error('Forgot password error:', err);
-    res.status(500).json({ message: 'Lỗi khi tạo token reset password' });
+    res.status(500).json({ message: 'Lỗi khi gửi email đặt lại mật khẩu' });
   }
 };
 
