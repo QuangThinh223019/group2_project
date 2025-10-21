@@ -149,7 +149,7 @@ exports.forgotPassword = async (req, res) => {
       html: `
         <h3>Xin chào ${user.name || 'bạn'},</h3>
         <p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng nhấn vào liên kết bên dưới để đặt lại mật khẩu (có hiệu lực 15 phút):</p>
-        <a href="${resetURL}" target="_blank">${resetURL}</a>
+        <p style="font-size:18px; font-weight:bold; color:#0000FF;">${token}</p>
         <p>Nếu bạn không yêu cầu hành động này, hãy bỏ qua email này.</p>
       `,
     });
