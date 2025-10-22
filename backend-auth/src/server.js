@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
+const { logActivity } = require('./middlewares/logActivity');
 
 // Import routes một cách an toàn
 let authRoutes, userRoutes, profileRoutes, uploadRoutes, logRoutes;
@@ -48,6 +49,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Trust proxy để lấy IP đúng
+app.set('trust proxy', true);
 
 // Routes - chỉ thêm routes đã import thành công
 app.get('/test', (req, res) => res.json({ message: 'Server works!' }));

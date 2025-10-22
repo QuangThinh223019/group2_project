@@ -1,16 +1,18 @@
-const ActivityLog = require('../models/ActivityLog');
+const Log = require('../models/Log');
 
 exports.logActivity = (action) => {
   return async (req, res, next) => {
     try {
-      await ActivityLog.create({
+      const newLog = await Log.create({
         userId: req.user ? req.user.id : null,
         action,
-        ip: req.ip,
-        userAgent: req.headers['user-agent']
+        ip: req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown',
+        timestamp: new Date()
       });
+      console.log(`✅ Activity logged: ${action} - ID: ${newLog._id}`);
     } catch (err) {
-      console.error('Log activity error:', err);
+      console.error('❌ Log activity error:', err.message);
     }
     next();
   };
