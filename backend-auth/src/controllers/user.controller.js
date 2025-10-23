@@ -44,7 +44,7 @@ exports.updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email, role, password } = req.body;
 
-    if (req.user.role !== 'admin','moderator') {
+    if (!['admin', 'moderator'].includes(req.user.role)) {
       return res.status(403).json({ message: 'Chỉ admin hoặc moderator mới được cập nhật user' });
     }
 
