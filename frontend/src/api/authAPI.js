@@ -4,6 +4,11 @@ import axios from "axios";
 const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
 const API_URL = `${BASE}/api/auth`; // chỉnh theo backend
 
+// Debug log để kiểm tra
+console.log('🔍 [authAPI] REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+console.log('🔍 [authAPI] BASE:', BASE);
+console.log('🔍 [authAPI] API_URL:', API_URL);
+
 // Tạo axios instance để dễ quản lý
 export const authAPI = axios.create({
   baseURL: API_URL,
