@@ -8,6 +8,7 @@ import UserList from "./components/UserList";
 import Profile from "./components/Profile";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+import AdminLogs from "./components/AdminLogs";
 
 import "./App.css";
 
@@ -110,9 +111,26 @@ function App() {
                     >
                       👤 Xem Profile
                     </button>
+                    <button 
+                      onClick={() => window.location.href = '/admin/logs'}
+                      className="logout-btn"
+                    >
+                      📋 Xem Logs
+                    </button>
                     <LogoutButton setIsLoggedIn={setIsLoggedIn} />
                   </div>
                 </>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/admin/logs"
+            element={
+              isLoggedIn && role === "admin" ? (
+                <AdminLogs />
               ) : (
                 <Navigate to="/login" replace />
               )
