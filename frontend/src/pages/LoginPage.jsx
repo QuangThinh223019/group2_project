@@ -1,10 +1,10 @@
 import React from "react";
 import LoginForm from "../components/LoginForm";
 
-function LoginPage({ setIsLoggedIn, setRole  }) {
+function LoginPage() {
   return (
     <div>
-      <LoginForm setIsLoggedIn={setIsLoggedIn} setRole={setRole} />
+      <LoginForm />
     </div>
   );
 }

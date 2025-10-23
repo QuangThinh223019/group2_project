@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { login } from "../api/authAPI";
-import { saveAuthData } from "../utils/auth";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { loginThunk } from '../features/auth/authSlice';
 import "../App.css";
 
-function LoginForm({ setIsLoggedIn, setRole }) {
+function LoginForm() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [disabledUntil, setDisabledUntil] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const auth = useSelector((s) => s.auth);
 
   // Countdown timer for rate-limit lock
   React.useEffect(() => {
@@ -33,46 +35,31 @@ function LoginForm({ setIsLoggedIn, setRole }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await login(form);
-      
-      // Backend trả về: accessToken, refreshToken, user
-      const { accessToken, refreshToken, user } = res.data;
-
-      // Lưu tất cả thông tin authentication
-      saveAuthData(accessToken, refreshToken, user);
-      setRole(user.role.toLowerCase());
-      setIsLoggedIn(true);
-      
-      setMessage("🎉 Đăng nhập thành công!");
-      setSuccess(true);
-
-      // Hiện thông báo 1.5s rồi redirect
-      setTimeout(() => {
-        if (user.role.toLowerCase() === "admin") {
-          navigate("/admin"); // admin
-        } else {
-          navigate("/profile"); // user thường
-        }
-      }, 1500);
-    } catch (error) {
-      console.error("Login error:", error);
-      const status = error.response?.status;
-      const errorMessage = error.response?.data?.message || "❌ Sai email hoặc mật khẩu!";
-      // If rate-limited (429), try to parse seconds from message and start local countdown
-      if (status === 429) {
-        // extract number of seconds from message (fallback to 60)
+      const action = await dispatch(loginThunk(form));
+      if (loginThunk.fulfilled.match(action)) {
+        const user = action.payload.user;
+        setMessage("🎉 Đăng nhập thành công!");
+        setSuccess(true);
+        setTimeout(() => {
+          if (user.role.toLowerCase() === "admin") navigate('/admin');
+          else navigate('/profile');
+        }, 800);
+      } else {
+        // rejected
+        const errorMessage = action.payload || action.error?.message || '❌ Sai email hoặc mật khẩu!';
+        const status = (action.meta && action.meta.rejectedWithValue) ? 400 : null;
+        // try parse 429-like message
         const m = (errorMessage || '').match(/(\d+)\s*giây|after\s*(\d+)\s*second|(\d+)/i);
-        let secs = 60;
         if (m) {
           const found = m[1] || m[2] || m[3];
-          if (found) secs = parseInt(found, 10);
+          if (found) setDisabledUntil(Date.now() + parseInt(found, 10) * 1000);
         }
-        setDisabledUntil(Date.now() + secs * 1000);
         setMessage(errorMessage);
-      } else {
-        setMessage(errorMessage);
+        setSuccess(false);
       }
-      setSuccess(false);
+    } catch (err) {
+      console.error('Unexpected login error', err);
+      setMessage('❌ Lỗi hệ thống');
     }
   };
 
@@ -94,14 +81,14 @@ function LoginForm({ setIsLoggedIn, setRole }) {
         required
         disabled={!!disabledUntil}
       />
-      <button type="submit" disabled={!!disabledUntil}>Đăng nhập</button>
+  <button type="submit" disabled={auth.loading || !!disabledUntil}>{auth.loading ? 'Đang...' : 'Đăng nhập'}</button>
       
 <Link to="/forgot-password">
             <button type="button" className="secondary-btn">
               🔑 Quên mật khẩu?
             </button>
           </Link>
-      <p>{message}</p>
+  <p>{message || auth.error}</p>
       
 
     </form>
