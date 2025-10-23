@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+const BASE = 'https://thinh-backend.onrender.com';
 const API_URL = `${BASE}/api/profile`;
 
 // Tạo axios instance cho profile API với interceptor tự động refresh token

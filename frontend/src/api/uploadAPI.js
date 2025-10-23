@@ -1,7 +1,7 @@
 // src/api/uploadAPI.js
 import axios from "axios";
 
-const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+const BASE = 'https://thinh-backend.onrender.com';
 const API_URL = `${BASE}/api/upload`;
 
 // Tạo axios instance cho upload API

@@ -35,7 +35,7 @@ export const createAuthenticatedAPI = (baseURL) => {
           }
 
           // Gọi API refresh token
-          const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+          const BASE = 'https://thinh-backend.onrender.com';
           const response = await axios.post(`${BASE}/api/auth/refresh`, { refreshToken });
 
           const { accessToken, refreshToken: newRefreshToken } = response.data;
