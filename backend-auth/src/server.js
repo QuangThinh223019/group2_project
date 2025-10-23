@@ -55,6 +55,12 @@ app.set('trust proxy', true);
 
 // Routes - chỉ thêm routes đã import thành công
 app.get('/test', (req, res) => res.json({ message: 'Server works!' }));
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Group 2 Backend API 🚀',
+    docs: '/api/auth, /api/users, /api/upload, /test'
+  });
+});
 
 if (authRoutes && typeof authRoutes === 'function') {
   app.use('/api/auth', authRoutes);
