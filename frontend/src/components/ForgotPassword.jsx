@@ -16,7 +16,8 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:4000/api/auth/forgot-password", { email });
+  const base = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+  const res = await axios.post(`${base}/api/auth/forgot-password`, { email });
       setMessage(`✅ ${res.data.message}`);
       if (res.data.token) setToken(res.data.token);
     } catch (err) {

@@ -1,7 +1,8 @@
 // src/api/authAPI.js
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/auth"; // chỉnh theo backend
+const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+const API_URL = `${BASE}/api/auth`; // chỉnh theo backend
 
 // Tạo axios instance để dễ quản lý
 export const authAPI = axios.create({
@@ -41,7 +42,7 @@ authAPI.interceptors.response.use(
 
         console.log("📤 [Auth] Gọi API refresh token...");
         // Gọi API refresh token
-        const response = await axios.post(`${API_URL}/refresh`, {
+        const response = await axios.post(`${BASE}/api/auth/refresh`, {
           refreshToken,
         });
 
@@ -86,5 +87,5 @@ export const logout = async () => {
 };
 
 export const refreshTokenAPI = async (refreshToken) => {
-  return axios.post(`${API_URL}/refresh`, { refreshToken });
+  return axios.post(`${BASE}/api/auth/refresh`, { refreshToken });
 };

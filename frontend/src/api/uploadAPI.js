@@ -1,7 +1,8 @@
 // src/api/uploadAPI.js
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/upload";
+const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+const API_URL = `${BASE}/api/upload`;
 
 // Tạo axios instance cho upload API
 const uploadAPI = axios.create({
@@ -39,7 +40,7 @@ uploadAPI.interceptors.response.use(
         }
 
         console.log("📤 [Upload] Gọi API refresh token...");
-        const response = await axios.post("http://localhost:4000/api/auth/refresh", {
+        const response = await axios.post(`${BASE}/api/auth/refresh`, {
           refreshToken,
         });
 

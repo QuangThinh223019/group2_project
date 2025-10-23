@@ -10,7 +10,10 @@ function UserList() {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/users");
+      const base = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+      const res = await axios.get(`${base}/api/users`, {
+        headers: localStorage.getItem('accessToken') ? { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } : {},
+      });
       setUsers(res.data);
     } catch (err) {
       console.error("Lỗi khi load user:", err);

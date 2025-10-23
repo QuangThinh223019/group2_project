@@ -25,7 +25,8 @@ function ResetPassword() {
     }
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:4000/api/auth/reset-password", {
+         const base = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+         const res = await axios.post(`${base}/api/auth/reset-password`, {
         token,
         newPassword,
       });

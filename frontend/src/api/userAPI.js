@@ -1,7 +1,8 @@
 // src/api/userAPI.js
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/users";
+const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+const API_URL = `${BASE}/api/users`;
 
 // Tạo axios instance cho user API
 const userAPI = axios.create({
@@ -39,7 +40,7 @@ userAPI.interceptors.response.use(
         }
 
         console.log("📤 [User] Gọi API refresh token...");
-        const response = await axios.post("http://localhost:4000/api/auth/refresh", {
+        const response = await axios.post(`${BASE}/api/auth/refresh`, {
           refreshToken,
         });
 

@@ -128,7 +128,8 @@ const userId = localStorage.getItem("userId");
     if (!window.confirm("Bạn có chắc muốn xóa tài khoản này không?")) return;
 
     try {
-      const res = await axios.delete(`http://localhost:4000/api/users/${userId}`, {
+      const base = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+      const res = await axios.delete(`${base}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
@@ -155,7 +156,7 @@ const userId = localStorage.getItem("userId");
                 ? URL.createObjectURL(avatar)
                 : avatar.startsWith('http') 
                   ? avatar 
-                  : `http://localhost:4000${avatar}`
+                  : `${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000'}${avatar}`
             }
             alt="Avatar"
             className="avatar-img"

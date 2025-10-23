@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/profile";
+const BASE = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+const API_URL = `${BASE}/api/profile`;
 
 // Tạo axios instance cho profile API với interceptor tự động refresh token
 const profileAPI = axios.create({
@@ -38,9 +39,9 @@ profileAPI.interceptors.response.use(
           throw new Error("No refresh token");
         }
 
-        console.log("📤 [Profile] Gọi API refresh token...");
-        // Gọi API refresh token
-        const response = await axios.post("http://localhost:4000/api/auth/refresh", {
+        console.log("📤 [Profile] Gửi API refresh token...");
+        // Gửi API refresh token
+        const response = await axios.post(`${BASE}/api/auth/refresh`, {
           refreshToken,
         });
 
