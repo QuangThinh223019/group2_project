@@ -29,4 +29,6 @@ router.post('/reset-password', logActivity('User Reset Password'), ctrl.resetPas
 // 🧩 Làm mới token
 router.post('/refresh', logActivity('User Refresh Token'), ctrl.refreshToken);
 
+router.get('/me', auth(), ctrl.getCurrentUser);
+
 module.exports = router;
