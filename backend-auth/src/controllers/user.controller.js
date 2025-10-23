@@ -15,11 +15,23 @@ exports.listUsers = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    if (req.user.role !== 'admin' && req.user.id !== id)
-      return res.status(403).json({ message: 'Không có quyền xoá user khác' });
 
-    await User.findByIdAndDelete(id);
-    res.json({ message: 'Đã xoá user' });
+    // Nếu là admin, không cho phép tự xóa chính mình
+    if (req.user.role === 'admin' && req.user.id === id) {
+      return res.status(403).json({ message: 'Admin không thể tự xoá chính mình' });
+    }
+
+    // Nếu không phải admin và không phải chính mình → không cho xóa
+    if (req.user.role !== 'admin' && req.user.id !== id) {
+      return res.status(403).json({ message: 'Không có quyền xoá user khác' });
+    }
+
+    const deletedUser = await User.findByIdAndDelete(id);
+    if (!deletedUser) {
+      return res.status(404).json({ message: 'Không tìm thấy user để xoá' });
+    }
+
+    res.json({ message: 'Đã xoá user thành công' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
