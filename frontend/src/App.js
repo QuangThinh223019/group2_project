@@ -9,13 +9,16 @@ import Profile from "./components/Profile";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import AdminLogs from "./components/AdminLogs";
+import ProtectedRoute from './components/ProtectedRoute';
+import { useSelector } from 'react-redux';
 
 import "./App.css";
 
 function App() {
   const [refresh, setRefresh] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState(localStorage.getItem("role") || "");
+  const auth = useSelector(s => s.auth);
+  const isLoggedIn = !!auth?.accessToken;
+  const role = auth?.user?.role ? auth.user.role.toLowerCase() : '';
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,20 +38,12 @@ function App() {
       console.log("🗑️ Đã xóa token cũ");
     }
     
-    // Nếu KHÔNG có accessToken -> chưa đăng nhập
     if (!accessToken) {
       console.log("❌ [App] Không có accessToken -> Chưa đăng nhập");
-      setIsLoggedIn(false);
-      setRole("");
       setLoading(false);
       return;
     }
-
-    // Có accessToken -> đã đăng nhập
-    const savedRole = localStorage.getItem("role");
-    console.log("✅ [App] Có accessToken -> Đã đăng nhập, role:", savedRole);
-    if (savedRole) setRole(savedRole.toLowerCase());
-    setIsLoggedIn(true);
+    console.log("✅ [App] Có accessToken -> Đã đăng nhập");
 
     // sau khi kiểm tra xong thì tắt loading
     setLoading(false);
@@ -74,68 +69,24 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route 
             path="/login" 
-            element={<LoginPage setIsLoggedIn={setIsLoggedIn} setRole={setRole} />} 
+            element={<LoginPage />} 
           />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
-          <Route
-            path="/profile"
-            element={
-              isLoggedIn ? (
-                <Profile />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           
-          <Route
-            path="/admin"
-            element={
-              isLoggedIn && role === "admin" ? (
-                <>
-                  <AddUser
-                    editingUser={editingUser}
-                    onUserAdded={() => setRefresh(r => r + 1)}
-                    onCancelEdit={() => setEditingUser(null)}
-                  />
-                  <UserList
-                    refresh={refresh}
-                    onEditUser={(user) => setEditingUser(user)}
-                  />
-                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
-                    <button 
-                      onClick={() => window.location.href = '/profile'}
-                      className="logout-btn"
-                    >
-                      👤 Xem Profile
-                    </button>
-                    <button 
-                      onClick={() => window.location.href = '/admin/logs'}
-                      className="logout-btn"
-                    >
-                      📋 Xem Logs
-                    </button>
-                    <LogoutButton setIsLoggedIn={setIsLoggedIn} />
-                  </div>
-                </>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+          <Route path="/admin" element={<ProtectedRoute adminOnly><>
+            <AddUser editingUser={editingUser} onUserAdded={() => setRefresh(r => r + 1)} onCancelEdit={() => setEditingUser(null)} />
+            <UserList refresh={refresh} onEditUser={(user) => setEditingUser(user)} />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
+              <button onClick={() => window.location.href = '/profile'} className="logout-btn">👤 Xem Profile</button>
+              <button onClick={() => window.location.href = '/admin/logs'} className="logout-btn">📋 Xem Logs</button>
+              <LogoutButton />
+            </div>
+          </></ProtectedRoute>} />
 
-          <Route
-            path="/admin/logs"
-            element={
-              isLoggedIn && role === "admin" ? (
-                <AdminLogs />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+          <Route path="/admin/logs" element={<ProtectedRoute adminOnly><AdminLogs /></ProtectedRoute>} />
 
           <Route
             path="/"

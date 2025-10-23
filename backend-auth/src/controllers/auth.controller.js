@@ -183,3 +183,15 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Lỗi khi đổi mật khẩu' });
   }
 };
+
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .select('-password -resetToken -resetTokenExp');
+    if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    res.json(user);
+  } catch (err) {
+    console.error('Get current user error:', err);
+    res.status(500).json({ message: 'Lỗi server khi lấy thông tin người dùng' });
+  }
+};

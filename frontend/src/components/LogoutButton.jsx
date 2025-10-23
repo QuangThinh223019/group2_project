@@ -1,24 +1,21 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../api/authAPI";
-import { removeAuthData } from "../utils/auth";
 import "../App.css";
+import { useDispatch } from 'react-redux';
+import { logoutThunk } from '../features/auth/authSlice';
 
-function LogoutButton({ setIsLoggedIn }) {
+function LogoutButton() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
     try {
-      // Gọi API logout để xóa refresh token ở backend
-      await logout();
-    } catch (error) {
-      console.error("Logout error:", error);
+      await dispatch(logoutThunk());
+    } catch (err) {
+      console.error('Logout error', err);
     } finally {
-      // Xóa tất cả dữ liệu auth khỏi localStorage
-      removeAuthData();
-      setIsLoggedIn(false);
-      alert("✅ Đăng xuất thành công!");
-      navigate("/login");
+      alert('✅ Đăng xuất thành công!');
+      navigate('/login');
     }
   };
 
