@@ -6,6 +6,10 @@ import { Provider } from 'react-redux';
 import store from './store';
 import reportWebVitals from './reportWebVitals';
 
+// DEBUG: Log environment variables
+console.log('🔍 [index.js] ALL ENV VARS:', process.env);
+console.log('🔍 [index.js] REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
