@@ -19,13 +19,13 @@ function ForgotPassword() {
 
     try {
       const res = await axios.post(`${API_BASE}/api/auth/forgot-password`, { email }, {
-        timeout: 30000
+        timeout: 120000
       });
       setMessage(`✅ ${res.data.message}`);
       if (res.data.token) setToken(res.data.token);
     } catch (err) {
       if (err.code === 'ECONNABORTED') {
-        setMessage("⚠️ Gmail SMTP đang bị chậm hoặc block. Vui lòng:\n\n🔹 Liên hệ Admin để lấy token reset trực tiếp\n🔹 Hoặc Admin kiểm tra backend logs để lấy token\n🔹 Sau đó dùng nút 'Đặt lại mật khẩu' bên dưới với token đó");
+        setMessage("⚠️ Gmail SMTP đang bị chậm hoặc block. Vui lòng:\n\n Liên hệ Admin để lấy token reset trực tiếp\n Hoặc Admin kiểm tra backend logs để lấy token\n Sau đó dùng nút 'Đặt lại mật khẩu' bên dưới với token đó");
       } else {
         setMessage(`❌ Gửi yêu cầu thất bại: ${err.response?.data?.message || err.message}`);
       }
@@ -76,7 +76,7 @@ function ForgotPassword() {
           <p>
             <Link to="/reset-password">
               <button type="button" className="secondary-btn">
-                � Đặt lại mật khẩu (nếu có token)
+                Đặt lại mật khẩu (nếu có token)
               </button>
             </Link>
           </p>
