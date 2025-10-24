@@ -19,7 +19,7 @@ function ForgotPassword() {
 
     try {
       const res = await axios.post(`${API_BASE}/api/auth/forgot-password`, { email }, {
-        timeout: 120000 // 120 giây (2 phút)
+        timeout: 30000
       });
       setMessage(`✅ ${res.data.message}`);
       if (res.data.token) setToken(res.data.token);
