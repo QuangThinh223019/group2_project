@@ -5,6 +5,8 @@ import { logout } from "../api/authAPI";
 import { removeAuthData } from "../utils/auth";
 import "../profile.css";
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
+
 
 function Profile() {
   const [name, setName] = useState("");
@@ -128,8 +130,7 @@ const userId = localStorage.getItem("userId");
     if (!window.confirm("Bạn có chắc muốn xóa tài khoản này không?")) return;
 
     try {
-      const base = 'https://thinh-backend.onrender.com';
-      const res = await axios.delete(`${base}/api/users/${userId}`, {
+      const res = await axios.delete(`${API_BASE}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
