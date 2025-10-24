@@ -148,13 +148,14 @@ exports.forgotPassword = async (req, res) => {
       subject: 'Đặt lại mật khẩu của bạn',
       html: `
         <h3>Xin chào ${user.name || 'bạn'},</h3>
-        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng nhấn vào liên kết bên dưới để đặt lại mật khẩu (có hiệu lực 15 phút):</p>
+        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Nhấn vào liên kết dưới đây để đặt lại (hiệu lực 15 phút):</p>
+        <p><a href="${resetURL}" target="_blank" rel="noopener">${resetURL}</a></p>
+        <p>Nếu không click được, bạn có thể sao chép token sau và dán vào ứng dụng:</p>
         <p style="font-size:18px; font-weight:bold; color:#0000FF;">${token}</p>
-        <p>Nếu bạn không yêu cầu hành động này, hãy bỏ qua email này.</p>
       `,
     });
 
-    res.json({ message: 'Email đặt lại mật khẩu đã được gửi thành công' });
+    res.json({ message: 'Đã gửi email đặt lại mật khẩu' });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(500).json({ message: 'Lỗi khi gửi email đặt lại mật khẩu' });
