@@ -5,6 +5,7 @@ import { API_BASE } from "../config/apiBase";
 
 // HARDCODE backend URL để fix Vercel
 const BASE = API_BASE;
+const API_URL = `${BASE}/api/auth`;
 
 // Tạo axios instance để dễ quản lý
 export const authAPI = axios.create({

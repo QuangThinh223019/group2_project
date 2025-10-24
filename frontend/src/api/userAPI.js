@@ -3,6 +3,7 @@ import axios from "axios";
 import { API_BASE } from "../config/apiBase";
 
 const BASE = API_BASE;
+const API_URL = `${BASE}/api/users`; 
 
 
 // Tạo axios instance cho user API

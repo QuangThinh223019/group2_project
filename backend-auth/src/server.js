@@ -48,7 +48,7 @@ const app = express();
 // Middleware
 const allowedOrigins = [
   'https://group2-project.vercel.app',
-  'http://localhost:4000',
+  'http://localhost:3000',
 ];
 
 app.use(cors({
