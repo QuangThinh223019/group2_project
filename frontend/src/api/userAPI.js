@@ -1,8 +1,9 @@
 // src/api/userAPI.js
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
 
-const BASE = 'https://thinh-backend.onrender.com';
-const API_URL = `${BASE}/api/users`;
+const BASE = API_BASE;
+
 
 // Tạo axios instance cho user API
 const userAPI = axios.create({
