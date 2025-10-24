@@ -165,7 +165,6 @@ exports.forgotPassword = async (req, res) => {
 
     console.log("✅ Resend: Email đặt lại mật khẩu đã được gửi tới", user.email);
 
-    // ✅ Không gửi token về frontend nữa
     res.json({
       message: "Yêu cầu đặt lại mật khẩu đã được gửi! Kiểm tra hộp thư hoặc thư rác.",
     });
