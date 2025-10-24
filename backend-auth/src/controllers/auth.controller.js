@@ -151,12 +151,10 @@ exports.forgotPassword = async (req, res) => {
       subject: "Đặt lại mật khẩu của bạn",
       html: `
         <div style="font-family:Arial,sans-serif;line-height:1.6">
-          <h2>Xin chào ${user.name || "bạn"} 👋</h2>
+          <h2>Xin chào ${user.name || "bạn"}</h2>
           <p>Bạn vừa yêu cầu đặt lại mật khẩu.</p>
-          <p>Nhấn vào liên kết bên dưới (hiệu lực trong 15 phút):</p>
-          <p><a href="${resetURL}" style="background:#007bff;color:white;padding:10px 15px;border-radius:6px;text-decoration:none">Đặt lại mật khẩu</a></p>
-          <p>Nếu nút trên không hoạt động, hãy sao chép và dán liên kết sau vào trình duyệt:</p>
-          <p>${resetURL}</p>
+          <p>hãy copy token bên dưới (hiệu lực trong 15 phút):</p>
+          <p>${token}</p>
           <br/>
           <p>Trân trọng,<br/>Đội ngũ Group2 Project</p>
         </div>
