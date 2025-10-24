@@ -135,39 +135,43 @@ exports.forgotPassword = async (req, res) => {
       return res.status(400).json({ message: "Email không tồn tại trong hệ thống!" });
     }
 
-    // 🔑 Tạo token JWT 15 phút
+    // 🔑 Tạo token JWT (15 phút)
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "secret", {
       expiresIn: "15m",
     });
 
-    const resetURL = `${process.env.CLIENT_URL}/reset-password/${token}`;
+    // ⚙️ Cấu hình Resend
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // 📧 Cấu hình nội dung email
-    const mailOptions = {
-      from: `"Group2 App" <${process.env.EMAIL_USER}>`,
+    // 📧 Gửi token trực tiếp vào email
+    await resend.emails.send({
+      from: "Group2 App <no-reply@mail.resend.dev>",
       to: user.email,
-      subject: "Đặt lại mật khẩu của bạn",
+      subject: "Mã token đặt lại mật khẩu của bạn",
       html: `
-        <div style="font-family:Arial,sans-serif">
+        <div style="font-family:Arial,sans-serif;line-height:1.6">
           <h2>Xin chào ${user.name || "bạn"} 👋</h2>
           <p>Bạn vừa yêu cầu đặt lại mật khẩu.</p>
-          <p>Copy toke bên dưới (hiệu lực 15 phút):</p>
-          <p>${token}</p>
+          <p>Đây là <b>mã token</b> của bạn (hiệu lực trong 15 phút):</p>
+          <div style="background:#f4f4f4;padding:10px;border-radius:6px;border:1px solid #ddd;font-family:monospace;">
+            ${token}
+          </div>
+          <p>Hãy sao chép token này và dán vào trang <b>Đặt lại mật khẩu</b> của ứng dụng.</p>
           <br/>
           <p>Trân trọng,<br/>Đội ngũ Group2 Project</p>
         </div>
       `,
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log("✅ Email đặt lại mật khẩu đã gửi tới", user.email);
+    console.log("✅ Token đã được gửi tới:", user.email);
 
     res.json({
-      message: "Yêu cầu đặt lại mật khẩu đã được gửi! Kiểm tra hộp thư hoặc spam.",
+      message: "✅ Token đã được gửi đến email của bạn! Hãy kiểm tra hộp thư hoặc spam.",
     });
+
   } catch (err) {
     console.error("❌ Forgot password error:", err.message);
-    res.status(500).json({ message: "Lỗi khi gửi email đặt lại mật khẩu." });
+    res.status(500).json({ message: "Lỗi khi gửi token qua email." });
   }
 };
 
