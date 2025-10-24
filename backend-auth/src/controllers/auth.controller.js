@@ -135,34 +135,41 @@ exports.forgotPassword = async (req, res) => {
       return res.status(400).json({ message: "Email không tồn tại trong hệ thống!" });
     }
 
-    // 🔑 Tạo token đặt lại mật khẩu
+    // 🔑 Tạo token JWT 15 phút
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "secret", {
       expiresIn: "15m",
     });
 
     const resetURL = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
-    // ⚙️ Gửi mail qua Resend
+    // ⚙️ Gửi mail thật bằng Resend
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "Group2 App <onboarding@resend.dev>", // bạn có thể thay domain nếu verify
+      from: "Group2 App <onboarding@resend.dev>",
       to: user.email,
       subject: "Đặt lại mật khẩu của bạn",
       html: `
-        <h2>Xin chào ${user.name || "bạn"} 👋</h2>
-        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Nhấn vào liên kết dưới đây (hiệu lực 15 phút):</p>
-        <p><a href="${resetURL}" target="_blank" rel="noopener">${resetURL}</a></p>
-        <p>Nếu không bấm được link, hãy sao chép và dán vào trình duyệt.</p>
+        <div style="font-family:Arial,sans-serif;line-height:1.6">
+          <h2>Xin chào ${user.name || "bạn"} 👋</h2>
+          <p>Bạn vừa yêu cầu đặt lại mật khẩu.</p>
+          <p>Nhấn vào liên kết bên dưới (hiệu lực trong 15 phút):</p>
+          <p><a href="${resetURL}" style="background:#007bff;color:white;padding:10px 15px;border-radius:6px;text-decoration:none">Đặt lại mật khẩu</a></p>
+          <p>Nếu nút trên không hoạt động, hãy sao chép và dán liên kết sau vào trình duyệt:</p>
+          <p>${resetURL}</p>
+          <br/>
+          <p>Trân trọng,<br/>Đội ngũ Group2 Project</p>
+        </div>
       `,
     });
 
-    console.log("✅ Resend: Email đặt lại mật khẩu đã gửi tới", user.email);
+    console.log("✅ Resend: Email đặt lại mật khẩu đã được gửi tới", user.email);
 
+    // ✅ Không gửi token về frontend nữa
     res.json({
-      message: "Yêu cầu đặt lại mật khẩu đã được gửi! (Kiểm tra hộp thư hoặc spam)",
-      token, // ⚠️ chỉ để test
+      message: "Yêu cầu đặt lại mật khẩu đã được gửi! Kiểm tra hộp thư hoặc thư rác.",
     });
+
   } catch (err) {
     console.error("❌ Forgot password error:", err.message);
     res.status(500).json({ message: "Lỗi khi gửi email đặt lại mật khẩu." });
