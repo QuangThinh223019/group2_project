@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const RefreshToken = require('../models/RefreshToken');
 const transporter = require('../config/mailer');
+const { Resend } = require("resend");
+
 
 const signAccessToken = (user) =>
   jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
@@ -129,36 +131,41 @@ exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
-    if (!user)
-      return res.json({ message: 'Nếu email tồn tại, token đã được gửi' });
+    if (!user) {
+      return res.status(400).json({ message: "Email không tồn tại trong hệ thống!" });
+    }
 
-    // 1️⃣ Tạo token reset
-    const token = crypto.randomBytes(32).toString('hex');
-    user.resetToken = token;
-    user.resetTokenExp = new Date(Date.now() + 15 * 60 * 1000);
-    await user.save();
+    // 🔑 Tạo token đặt lại mật khẩu
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "secret", {
+      expiresIn: "15m",
+    });
 
-    // 2️⃣ Tạo URL reset (frontend)
     const resetURL = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
-    // 3️⃣ Gửi email thật
-    await transporter.sendMail({
-      from: `"User Management" <${process.env.EMAIL_USER}>`,
+    // ⚙️ Gửi mail qua Resend
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    await resend.emails.send({
+      from: "Group2 App <onboarding@resend.dev>", // bạn có thể thay domain nếu verify
       to: user.email,
-      subject: 'Đặt lại mật khẩu của bạn',
+      subject: "Đặt lại mật khẩu của bạn",
       html: `
-        <h3>Xin chào ${user.name || 'bạn'},</h3>
-        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Nhấn vào liên kết dưới đây để đặt lại (hiệu lực 15 phút):</p>
+        <h2>Xin chào ${user.name || "bạn"} 👋</h2>
+        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Nhấn vào liên kết dưới đây (hiệu lực 15 phút):</p>
         <p><a href="${resetURL}" target="_blank" rel="noopener">${resetURL}</a></p>
-        <p>Nếu không click được, bạn có thể sao chép token sau và dán vào ứng dụng:</p>
-        <p style="font-size:18px; font-weight:bold; color:#0000FF;">${token}</p>
+        <p>Nếu không bấm được link, hãy sao chép và dán vào trình duyệt.</p>
       `,
     });
 
-    res.json({ message: 'Đã gửi email đặt lại mật khẩu' });
+    console.log("✅ Resend: Email đặt lại mật khẩu đã gửi tới", user.email);
+
+    res.json({
+      message: "Yêu cầu đặt lại mật khẩu đã được gửi! (Kiểm tra hộp thư hoặc spam)",
+      token, // ⚠️ chỉ để test
+    });
   } catch (err) {
-    console.error('Forgot password error:', err);
-    res.status(500).json({ message: 'Lỗi khi gửi email đặt lại mật khẩu' });
+    console.error("❌ Forgot password error:", err.message);
+    res.status(500).json({ message: "Lỗi khi gửi email đặt lại mật khẩu." });
   }
 };
 
