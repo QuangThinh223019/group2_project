@@ -22,8 +22,7 @@ function LoginForm() {
         setMessage("");
         clearInterval(interval);
       } else {
-        const sec = Math.ceil((disabledUntil - Date.now()) / 1000);
-        setMessage(`⚠️ Quá nhiều lần đăng nhập. Vui lòng thử lại sau ${sec} giây.`);
+        setMessage(`⚠️ Quá nhiều lần đăng nhập. Vui lòng thử lại sau 30 giây.`);
       }
     }, 500);
     return () => clearInterval(interval);

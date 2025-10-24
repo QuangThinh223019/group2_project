@@ -1,6 +1,7 @@
 import { createAuthenticatedAPI } from './axiosConfig';
+import { API_BASE } from "../config/apiBase";
 
-const logAPI = createAuthenticatedAPI('https://thinh-backend.onrender.com/api/logs');
+const logAPI = createAuthenticatedAPI(`${API_BASE}/api/logs`);
 
 export const fetchLogs = async () => {
   const res = await logAPI.get('/');

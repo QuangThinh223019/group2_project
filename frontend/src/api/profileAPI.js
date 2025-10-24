@@ -1,7 +1,7 @@
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
 
-const BASE = 'https://thinh-backend.onrender.com';
-const API_URL = `${BASE}/api/profile`;
+const API_URL = `${API_BASE}/api/profile`;
 
 // Tạo axios instance cho profile API với interceptor tự động refresh token
 const profileAPI = axios.create({
@@ -41,7 +41,7 @@ profileAPI.interceptors.response.use(
 
         console.log("📤 [Profile] Gửi API refresh token...");
         // Gửi API refresh token
-        const response = await axios.post(`${BASE}/api/auth/refresh`, {
+        const response = await axios.post(`${API_BASE}/api/auth/refresh`, {
           refreshToken,
         });
 

@@ -1,8 +1,8 @@
 // src/api/uploadAPI.js
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
 
-const BASE = 'https://thinh-backend.onrender.com';
-const API_URL = `${BASE}/api/upload`;
+const API_URL = `${API_BASE}/api/upload`;
 
 // Tạo axios instance cho upload API
 const uploadAPI = axios.create({

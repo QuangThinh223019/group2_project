@@ -2,6 +2,7 @@
 // File này chứa logic chung để tạo axios instance với auto-refresh token
 
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
 
 export const createAuthenticatedAPI = (baseURL) => {
   const api = axios.create({ baseURL });
@@ -35,9 +36,7 @@ export const createAuthenticatedAPI = (baseURL) => {
           }
 
           // Gọi API refresh token
-          const BASE = 'https://thinh-backend.onrender.com';
-          const response = await axios.post(`${BASE}/api/auth/refresh`, { refreshToken });
-
+          const response = await axios.post(`${API_BASE}/api/auth/refresh`, { refreshToken });
           const { accessToken, refreshToken: newRefreshToken } = response.data;
 
           // Lưu tokens mới
