@@ -75,7 +75,7 @@ function ForgotPassword() {
           <p>
             <Link to="/reset-password">
               <button type="button" className="secondary-btn">
-                � Đặt lại mật khẩu (nếu có token)
+                Đặt lại mật khẩu
               </button>
             </Link>
           </p>

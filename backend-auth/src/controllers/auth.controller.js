@@ -141,20 +141,34 @@ exports.forgotPassword = async (req, res) => {
     // 2️⃣ Tạo URL reset (frontend)
     const resetURL = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
-    // 3️⃣ Gửi email thật
-    await transporter.sendMail({
-      from: `"User Management" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: 'Đặt lại mật khẩu của bạn',
-      html: `
-        <h3>Xin chào ${user.name || 'bạn'},</h3>
-        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng nhấn vào liên kết bên dưới để đặt lại mật khẩu (có hiệu lực 15 phút):</p>
-        <p style="font-size:18px; font-weight:bold; color:#0000FF;">${token}</p>
-        <p>Nếu bạn không yêu cầu hành động này, hãy bỏ qua email này.</p>
-      `,
-    });
-
-    res.json({ message: 'Email đặt lại mật khẩu đã được gửi thành công' });
+    // 3️⃣ Gửi email với timeout để tránh treo
+    try {
+      await Promise.race([
+        transporter.sendMail({
+          from: `"User Management" <${process.env.EMAIL_USER}>`,
+          to: user.email,
+          subject: 'Đặt lại mật khẩu của bạn',
+          html: `
+            <h3>Xin chào ${user.name || 'bạn'},</h3>
+            <p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng nhấn vào liên kết bên dưới để đặt lại mật khẩu (có hiệu lực 15 phút):</p>
+            <p style="font-size:18px; font-weight:bold; color:#0000FF;">${token}</p>
+            <p>Nếu bạn không yêu cầu hành động này, hãy bỏ qua email này.</p>
+          `,
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email timeout')), 15000) // 15 giây timeout
+        )
+      ]);
+      
+      res.json({ message: 'Email đặt lại mật khẩu đã được gửi thành công' });
+    } catch (emailErr) {
+      // Nếu gửi email thất bại hoặc timeout, vẫn trả token cho user
+      console.error('Email sending failed:', emailErr);
+      res.json({ 
+        message: 'Không thể gửi email. Sử dụng token bên dưới để đặt lại mật khẩu (có hiệu lực 15 phút)',
+        token: token 
+      });
+    }
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(500).json({ message: 'Lỗi khi gửi email đặt lại mật khẩu' });
