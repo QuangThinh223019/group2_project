@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../App.css"; // import CSS (App.css chứa .token-box / .token-display)
+import { API_BASE } from "../config/apiBase";
+
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -16,8 +18,7 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      const base = 'https://thinh-backend.onrender.com';
-      const res = await axios.post(`${base}/api/auth/forgot-password`, { email }, {
+      const res = await axios.post(`${API_BASE}/api/auth/forgot-password`, { email }, {
         timeout: 120000 // 120 giây (2 phút)
       });
       setMessage(`✅ ${res.data.message}`);
