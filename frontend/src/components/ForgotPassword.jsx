@@ -11,17 +11,23 @@ function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
+    setMessage("⏳ Đang gửi email... (Lưu ý: Gmail SMTP có thể mất 1-2 phút hoặc bị block)");
     setToken("");
     setLoading(true);
 
     try {
-  const base = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
-  const res = await axios.post(`${base}/api/auth/forgot-password`, { email });
+      const base = 'https://thinh-backend.onrender.com';
+      const res = await axios.post(`${base}/api/auth/forgot-password`, { email }, {
+        timeout: 120000 // 120 giây (2 phút)
+      });
       setMessage(`✅ ${res.data.message}`);
       if (res.data.token) setToken(res.data.token);
     } catch (err) {
-      setMessage("❌ Gửi yêu cầu thất bại!");
+      if (err.code === 'ECONNABORTED') {
+        setMessage("⚠️ Gmail SMTP đang bị chậm hoặc block. Vui lòng:\n\n🔹 Liên hệ Admin để lấy token reset trực tiếp\n🔹 Hoặc Admin kiểm tra backend logs để lấy token\n🔹 Sau đó dùng nút 'Đặt lại mật khẩu' bên dưới với token đó");
+      } else {
+        setMessage(`❌ Gửi yêu cầu thất bại: ${err.response?.data?.message || err.message}`);
+      }
       console.error(err);
     } finally {
       setLoading(false);
@@ -62,14 +68,14 @@ function ForgotPassword() {
 
           <p>
             <button type="submit" disabled={loading}>
-              {loading ? "Đang gửi..." : "Gửi yêu cầu"}
+              {loading ? "⏳ Đang gửi... (1-2 phút)" : "Gửi yêu cầu"}
             </button>
           </p>
 
           <p>
             <Link to="/reset-password">
               <button type="button" className="secondary-btn">
-                👉 Đặt lại mật khẩu
+                � Đặt lại mật khẩu (nếu có token)
               </button>
             </Link>
           </p>

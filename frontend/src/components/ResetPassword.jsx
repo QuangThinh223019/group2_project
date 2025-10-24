@@ -25,7 +25,7 @@ function ResetPassword() {
     }
     setLoading(true);
     try {
-         const base = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+         const base = 'https://thinh-backend.onrender.com';
          const res = await axios.post(`${base}/api/auth/reset-password`, {
         token,
         newPassword,

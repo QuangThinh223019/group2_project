@@ -128,7 +128,7 @@ const userId = localStorage.getItem("userId");
     if (!window.confirm("Bạn có chắc muốn xóa tài khoản này không?")) return;
 
     try {
-      const base = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000';
+      const base = 'https://thinh-backend.onrender.com';
       const res = await axios.delete(`${base}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -156,7 +156,7 @@ const userId = localStorage.getItem("userId");
                 ? URL.createObjectURL(avatar)
                 : avatar.startsWith('http') 
                   ? avatar 
-                  : `${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : 'http://localhost:4000'}${avatar}`
+                  : `https://thinh-backend.onrender.com${avatar}`
             }
             alt="Avatar"
             className="avatar-img"
