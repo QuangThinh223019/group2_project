@@ -1,8 +1,8 @@
 // src/api/uploadAPI.js
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
 
-const BASE = 'https://thinh-backend.onrender.com';
-const API_URL = `${BASE}/api/upload`;
+const API_URL = `${API_BASE}/api/upload`;
 
 // Tạo axios instance cho upload API
 const uploadAPI = axios.create({
@@ -40,7 +40,7 @@ uploadAPI.interceptors.response.use(
         }
 
         console.log("📤 [Upload] Gọi API refresh token...");
-        const response = await axios.post(`${BASE}/api/auth/refresh`, {
+        const response = await axios.post(`${API_BASE}/api/auth/refresh`, {
           refreshToken,
         });
 

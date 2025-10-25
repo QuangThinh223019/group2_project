@@ -16,7 +16,7 @@ function SignupForm() {
     
     // Kiểm tra mật khẩu trùng khớp
     if (form.password !== form.confirmPassword) {
-      setMessage("❌ Mật khẩu không khớp!");
+      setMessage("Mật khẩu không khớp!");
       setSuccess(false);
       return;
     }
@@ -40,7 +40,7 @@ function SignupForm() {
       }, 1500);
     } catch (error) {
       console.error("Signup error:", error);
-      const errorMessage = error.response?.data?.message || "❌ Lỗi: Email đã tồn tại hoặc server lỗi.";
+      const errorMessage = error.response?.data?.message || "Lỗi: Email đã tồn tại hoặc server lỗi.";
       setMessage(errorMessage);
       setSuccess(false);
     }

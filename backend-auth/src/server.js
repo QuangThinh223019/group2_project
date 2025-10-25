@@ -46,7 +46,15 @@ try {
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  'https://group2-project.vercel.app',
+  'http://localhost:3000',
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(morgan('dev'));
 

@@ -5,6 +5,8 @@ import { logout } from "../api/authAPI";
 import { removeAuthData } from "../utils/auth";
 import "../profile.css";
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
+
 
 function Profile() {
   const [name, setName] = useState("");
@@ -94,7 +96,7 @@ const userId = localStorage.getItem("userId");
       setNewPassword("");
     } catch (err) {
       console.error(err);
-      setMessage(err.response?.data?.message || "❌ Cập nhật thất bại!");
+      setMessage(err.response?.data?.message || " Cập nhật thất bại!");
       setSuccess(false);
     } finally {
       setLoading(false);
@@ -120,7 +122,7 @@ const userId = localStorage.getItem("userId");
     console.log("Sending delete request:", { userId, accessToken });
 
     if (!userId || !accessToken) {
-      alert("❌ Không xác định được user hoặc chưa đăng nhập!");
+      alert(" Admin không thể tự xóa chính mình");
       return;
     }
 
@@ -128,17 +130,16 @@ const userId = localStorage.getItem("userId");
     if (!window.confirm("Bạn có chắc muốn xóa tài khoản này không?")) return;
 
     try {
-      const base = 'https://thinh-backend.onrender.com';
-      const res = await axios.delete(`${base}/api/users/${userId}`, {
+      const res = await axios.delete(`${API_BASE}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      alert(res.data.message || "🎉 Tài khoản đã được xóa!");
+      alert(res.data.message || " Tài khoản đã được xóa!");
       localStorage.clear();
       window.location.href = "/login";
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "❌ Xóa tài khoản thất bại!");
+      alert(err.response?.data?.message || " Xóa tài khoản thất bại!");
     }
   };
 

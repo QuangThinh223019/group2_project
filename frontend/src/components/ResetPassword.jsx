@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
+import { API_BASE } from "../config/apiBase";
 
 function ResetPassword() {
   const { token: tokenFromUrl } = useParams();
@@ -25,8 +26,7 @@ function ResetPassword() {
     }
     setLoading(true);
     try {
-         const base = 'https://thinh-backend.onrender.com';
-         const res = await axios.post(`${base}/api/auth/reset-password`, {
+      const res = await axios.post(`${API_BASE}/api/auth/reset-password`, {
         token,
         newPassword,
       });

@@ -1,8 +1,10 @@
 // src/api/authAPI.js
 import axios from "axios";
+import { API_BASE } from "../config/apiBase";
+
 
 // HARDCODE backend URL để fix Vercel
-const BASE = 'https://thinh-backend.onrender.com';
+const BASE = API_BASE;
 const API_URL = `${BASE}/api/auth`;
 
 // Tạo axios instance để dễ quản lý
