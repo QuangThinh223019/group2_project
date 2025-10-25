@@ -96,7 +96,7 @@ const userId = localStorage.getItem("userId");
       setNewPassword("");
     } catch (err) {
       console.error(err);
-      setMessage(err.response?.data?.message || "❌ Cập nhật thất bại!");
+      setMessage(err.response?.data?.message || " Cập nhật thất bại!");
       setSuccess(false);
     } finally {
       setLoading(false);
@@ -122,7 +122,7 @@ const userId = localStorage.getItem("userId");
     console.log("Sending delete request:", { userId, accessToken });
 
     if (!userId || !accessToken) {
-      alert("❌ Không xác định được user hoặc chưa đăng nhập!");
+      alert(" Admin không thể tự xóa chính mình");
       return;
     }
 
@@ -134,12 +134,12 @@ const userId = localStorage.getItem("userId");
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      alert(res.data.message || "🎉 Tài khoản đã được xóa!");
+      alert(res.data.message || " Tài khoản đã được xóa!");
       localStorage.clear();
       window.location.href = "/login";
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "❌ Xóa tài khoản thất bại!");
+      alert(err.response?.data?.message || " Xóa tài khoản thất bại!");
     }
   };
 

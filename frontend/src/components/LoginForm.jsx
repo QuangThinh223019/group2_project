@@ -15,18 +15,22 @@ function LoginForm() {
 
   // Countdown timer for rate-limit lock
   React.useEffect(() => {
-    if (!disabledUntil) return;
-    const interval = setInterval(() => {
-      if (Date.now() >= disabledUntil) {
-        setDisabledUntil(null);
-        setMessage("");
-        clearInterval(interval);
-      } else {
-        setMessage(`⚠️ Quá nhiều lần đăng nhập. Vui lòng thử lại sau 30 giây.`);
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [disabledUntil]);
+  if (!disabledUntil) return;
+
+  const interval = setInterval(() => {
+    const remainingMs = disabledUntil - Date.now();
+    if (remainingMs <= 0) {
+      setDisabledUntil(null);
+      setMessage("");
+      clearInterval(interval);
+    } else {
+      const sec = Math.ceil(remainingMs / 1000);
+      setMessage(`Quá nhiều lần đăng nhập. Vui lòng thử lại sau ${sec} giây.`);
+    }
+  }, 500);
+
+  return () => clearInterval(interval);
+}, [disabledUntil]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -45,7 +49,7 @@ function LoginForm() {
         }, 800);
       } else {
         // rejected
-        const errorMessage = action.payload || action.error?.message || '❌ Sai email hoặc mật khẩu!';
+        const errorMessage = action.payload || action.error?.message || 'Sai email hoặc mật khẩu!';
         const status = (action.meta && action.meta.rejectedWithValue) ? 400 : null;
         // try parse 429-like message
         const m = (errorMessage || '').match(/(\d+)\s*giây|after\s*(\d+)\s*second|(\d+)/i);
@@ -58,7 +62,7 @@ function LoginForm() {
       }
     } catch (err) {
       console.error('Unexpected login error', err);
-      setMessage('❌ Lỗi hệ thống');
+      setMessage('Lỗi hệ thống');
     }
   };
 
@@ -80,7 +84,7 @@ function LoginForm() {
         required
         disabled={!!disabledUntil}
       />
-  <button type="submit" disabled={auth.loading || !!disabledUntil}>{auth.loading ? 'Đang...' : 'Đăng nhập'}</button>
+  <button type="submit" disabled={auth.loading || !!disabledUntil}>{auth.loading ? 'Đang đăng nhập...' : 'Đăng nhập'}</button>
       
 <Link to="/forgot-password">
             <button type="button" className="secondary-btn">
