@@ -16,7 +16,6 @@ function LoginForm() {
   // Countdown timer for rate-limit lock
   React.useEffect(() => {
   if (!disabledUntil) return;
-
   const interval = setInterval(() => {
     const remainingMs = disabledUntil - Date.now();
     if (remainingMs <= 0) {
@@ -25,12 +24,12 @@ function LoginForm() {
       clearInterval(interval);
     } else {
       const sec = Math.ceil(remainingMs / 1000);
-      setMessage(`Quá nhiều lần đăng nhập. Vui lòng thử lại sau ${sec} giây.`);
+      setMessage(`⚠️ Quá nhiều lần đăng nhập. Vui lòng thử lại sau ${sec} giây.`);
     }
   }, 500);
 
-  return () => clearInterval(interval);
-}, [disabledUntil]);
+    return () => clearInterval(interval);
+  }, [disabledUntil]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -59,6 +58,7 @@ function LoginForm() {
         }
         setMessage(errorMessage);
         setSuccess(false);
+        setDisabledUntil(Date.now() + 30 * 1000);
       }
     } catch (err) {
       console.error('Unexpected login error', err);
