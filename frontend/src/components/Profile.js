@@ -19,7 +19,10 @@ function Profile() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const role = localStorage.getItem("role");
-const userId = localStorage.getItem("userId");
+  const userId = localStorage.getItem("userId");
+  const isAdmin = role?.toLowerCase() === "admin";
+  
+  console.log("🔍 Profile - Role check:", { role, isAdmin });
 
 
   useEffect(() => {
@@ -122,7 +125,7 @@ const userId = localStorage.getItem("userId");
     console.log("Sending delete request:", { userId, accessToken });
 
     if (!userId || !accessToken) {
-      alert(" Admin không thể tự xóa chính mình");
+      alert("⚠️ Không tìm thấy thông tin đăng nhập. Vui lòng đăng nhập lại.");
       return;
     }
 
@@ -156,7 +159,7 @@ const userId = localStorage.getItem("userId");
               avatar instanceof File 
                 ? URL.createObjectURL(avatar)
                 : avatar.startsWith('http') 
-                  ? avatar 
+                  ? avatar
                   : `https://thinh-backend.onrender.com${avatar}`
             }
             alt="Avatar"
@@ -213,7 +216,7 @@ const userId = localStorage.getItem("userId");
       </form>
 
       {/* Nút dành cho admin */}
-      {role === "admin" && (
+      {isAdmin && (
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
           <button
             type="button"
@@ -233,7 +236,7 @@ const userId = localStorage.getItem("userId");
       )}
 
       {/* Nút dành cho user thường */}
-      {role !== "admin" && (
+      {!isAdmin && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', marginTop: '20px' }}>
           <button
             type="button"

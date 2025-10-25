@@ -44,6 +44,8 @@ const authSlice = createSlice({
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('userId', user.id || user._id);
+      localStorage.setItem('role', user.role?.toLowerCase() || 'user');
     },
     clearAuth(state) {
       state.accessToken = null;
@@ -52,6 +54,8 @@ const authSlice = createSlice({
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('role');
     }
   },
   extraReducers: (builder) => {
@@ -65,6 +69,8 @@ const authSlice = createSlice({
         localStorage.setItem('accessToken', action.payload.accessToken);
         localStorage.setItem('refreshToken', action.payload.refreshToken);
         localStorage.setItem('user', JSON.stringify(action.payload.user));
+        localStorage.setItem('userId', action.payload.user.id || action.payload.user._id);
+        localStorage.setItem('role', action.payload.user.role?.toLowerCase() || 'user');
       })
       .addCase(loginThunk.rejected, (state, action) => { state.loading = false; state.error = action.payload || action.error.message; })
       .addCase(logoutThunk.fulfilled, (state) => {
@@ -74,6 +80,8 @@ const authSlice = createSlice({
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('role');
       });
   }
 });

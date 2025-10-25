@@ -24,16 +24,21 @@ function ResetPassword() {
       setMessage("❌ Mật khẩu nhập lại không khớp!");
       return;
     }
+    if (!newPassword || newPassword.length < 6) {
+      setMessage("❌ Mật khẩu phải có ít nhất 6 ký tự!");
+      return;
+    }
     setLoading(true);
     try {
+      console.log("🔐 Reset password request:", { token: token.substring(0, 20) + "...", passwordLength: newPassword.length });
       const res = await axios.post(`${API_BASE}/api/auth/reset-password`, {
         token,
         newPassword,
       });
       setMessage(`✅ ${res.data.message}`);
     } catch (err) {
-      setMessage("❌ Đổi mật khẩu thất bại!");
-      console.error(err);
+      console.error("❌ Reset password error:", err.response?.data || err.message);
+      setMessage(`❌ Đổi mật khẩu thất bại: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
