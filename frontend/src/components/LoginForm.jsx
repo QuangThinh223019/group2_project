@@ -21,6 +21,7 @@ function LoginForm() {
     if (remainingMs <= 0) {
       setDisabledUntil(null);
       setMessage("");
+      setFailCount(0);
       clearInterval(interval);
     } else {
       const sec = Math.ceil(remainingMs / 1000);
@@ -36,12 +37,14 @@ function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (disabledUntil) return;
     try {
       const action = await dispatch(loginThunk(form));
       if (loginThunk.fulfilled.match(action)) {
         const user = action.payload.user;
         setMessage("🎉 Đăng nhập thành công!");
         setSuccess(true);
+        setFailCount(0);
         setTimeout(() => {
           if (user.role.toLowerCase() === "admin") navigate('/admin');
           else navigate('/profile');
@@ -58,7 +61,13 @@ function LoginForm() {
         }
         setMessage(errorMessage);
         setSuccess(false);
-        setDisabledUntil(Date.now() + 30 * 1000);
+        setFailCount(prev => {
+          const newCount = prev + 1;
+          if (newCount >= 5) { 
+            setDisabledUntil(Date.now() + 30 * 1000);
+          }
+          return newCount;
+        });
       }
     } catch (err) {
       console.error('Unexpected login error', err);
