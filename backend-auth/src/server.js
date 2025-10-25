@@ -24,6 +24,13 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/upload', uploadRoutes);
 
+app.get('/', (req, res) => {
+  res.send('✅ Backend is live on Render!');
+});
+
+app.get('/healthz', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime() });
+});
 
 
 
