@@ -145,7 +145,7 @@ exports.forgotPassword = async (req, res) => {
 
     // 📧 Gửi token trực tiếp vào email
     await resend.emails.send({
-      from: "Group2 App <onboarding@resend.dev>",
+      from: "Group2 App <no-reply@group2project.shop>",
       to: user.email,
       subject: "Mã token đặt lại mật khẩu của bạn",
       html: `
