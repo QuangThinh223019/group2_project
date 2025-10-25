@@ -9,6 +9,7 @@ function LoginForm() {
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [disabledUntil, setDisabledUntil] = useState(null);
+  const [failCount, setFailCount] = useState(0);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auth = useSelector((s) => s.auth);
